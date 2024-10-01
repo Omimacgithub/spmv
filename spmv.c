@@ -32,7 +32,6 @@ unsigned int populate_sparse_matrix(double mat[], unsigned int n, double density
 unsigned int populate_vector(double vec[], unsigned int size, unsigned int seed)
 {
   srand(seed);
-
   for (unsigned int i = 0; i < size; i++) {
     vec[i] = ((double)(rand() % 10) + (double)rand() / RAND_MAX) * (rand() % 2 == 0 ? 1 : -1);
   }
@@ -91,12 +90,6 @@ int main(int argc, char *argv[])
   //
   printf("Dense computation\n----------------\n");
 
-  timeinfo start, now;
-  timestamp(&start);
-
-  cblas_dgemv(CblasRowMajor, CblasNoTrans, size, size, 1.0, mat, size, vec, 1, 0.0, refsol, 1);
-
-  timestamp(&now);
   printf("Time taken by CBLAS dense computation: %ld ms\n", diff_milli(&start, &now));
 
   //
@@ -131,7 +124,6 @@ int main(int argc, char *argv[])
   //
 
   // Compare times (and computation correctness!)
-
 
   // Free resources
   free(mat);
