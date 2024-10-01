@@ -1,3 +1,4 @@
+
 # SpMV: Sparse Matrix-Vector product
 
 Use this code skeleton for the associated tasks in HPCTools.
@@ -12,5 +13,5 @@ implementation. You just need to change the library to be linked,
 eg. `-lopenblas` instead of `-lgslcblas`
 
 The basetype in GSL for working with sparse matrices is `gsl_spmatrix`.
-GSL also provides functions to help convert you dense matrices into a
-sparse format.
+GSL also provides functions to help convert you dense matrices into a sparse format.
+
