@@ -1,21 +1,21 @@
 #include "spmv.h"
 #include <math.h>
+#include <stdio.h>
 
 int my_dense(const unsigned int n, const double mat[], double vec[], double result[])
 {
   // code your own solver
-  int rows=0, j=0, z=0;
+  int row_offset=n, j=0, z=0, size=n*n;
   double tmp = 0.0;
   //Assuming an NxN matrix 
-  rows = (int) sqrt(n);
-  while(rows <= n ){
-  	for (j=j; j < rows ; ++j){
-		tmp = tmp + mat[j] * vec[j];
+  while(row_offset <= size){
+  	for (j; j < row_offset ; j++){
+		tmp += mat[j] * vec[j%n];
 
 	}
 	result[z] = tmp;
 	tmp=0;
 	++z;
-	rows += j;
+	row_offset += n;
   }
 }
