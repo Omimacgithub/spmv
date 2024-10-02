@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "timer.h"
 #include "spmv.h"
+#include "csr.h"
 
 #define DEFAULT_SIZE 1024
 #define DEFAULT_DENSITY 0.25
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
 {
   int size;        // number of rows and cols (size x size matrix)
   double density;  // aprox. ratio of non-zero values
+  csr m;	   // Matrix into CSR format
 
   if (argc < 2) {
     size = DEFAULT_SIZE;
@@ -111,6 +113,7 @@ int main(int argc, char *argv[])
   //
 
   // Convert mat to a sparse format: CSR
+  m = intoCSR(size, mat);
 
   //
   // Sparse computation using CSPARSE
@@ -119,6 +122,17 @@ int main(int argc, char *argv[])
   //
   // Your own sparse implementation
   //
+  timestamp(&start);
+
+  my_sparse(size, m, vec, mysol);
+
+  timestamp(&now);
+  printf("Time taken by my sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+
+  if (check_result(refsol, mysol, size) == 1)
+    printf("Result is ok!\n");
+  else
+    printf("Result is wrong!\n");
 
   // Compare times (and computation correctness!)
 
