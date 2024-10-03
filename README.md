@@ -1,4 +1,3 @@
-
 # SpMV: Sparse Matrix-Vector product
 
 Use this code skeleton for the associated tasks in HPCTools.
