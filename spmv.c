@@ -6,7 +6,7 @@
 #include <gsl/gsl_vector.h>
 #include "timer.h"
 #include "spmv.h"
-#include "csr.h"
+//#include "csr.h"
 
 #define DEFAULT_SIZE 1024
 #define DEFAULT_DENSITY 0.25
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 {
   int size;        // number of rows and cols (size x size matrix)
   double density;  // aprox. ratio of non-zero values
-  csr m;	   // Matrix into CSR format
+  //csr m;
 
   if (argc < 2) {
     size = DEFAULT_SIZE;
@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
     density = atoi(argv[2]);
   }
 
+  gsl_spmatrix *m = gsl_spmatrix_alloc(size, size);	   // Matrix into CSR format
   double *mat, *vec, *refsol, *mysol;
 
   mat = (double *) malloc(size * size * sizeof(double));
@@ -123,7 +124,7 @@ int main(int argc, char *argv[])
 
   // Convert mat to a sparse format: CSR
   // Use the gsl_spmatrix struct as datatype
-  m = intoCSR(size, mat);
+  //m = intoCSR(size, mat);
 
   //
   // Sparse computation using GSL's sparse algebra functions
@@ -132,6 +133,19 @@ int main(int argc, char *argv[])
   //
   // Your own sparse implementation
   //
+
+  double value;
+  int i, j;
+  for (i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            value = mat[i * size + j]; 
+            if (value != 0.0) {
+                gsl_spmatrix_set(m, i, j, value); 
+            }
+        }
+    }
+
+
   timestamp(&start);
 
   my_sparse(size, m, vec, mysol);
@@ -151,6 +165,7 @@ int main(int argc, char *argv[])
   free(vec);
   free(refsol);
   free(mysol);
+  gsl_spmatrix_free(sp_matrix);
 
   return 0;
 }
