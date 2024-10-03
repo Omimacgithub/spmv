@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <gsl/gsl_cblas.h>      // CBLAS in GSL (the GNU Scientific Library)
-//#include <gsl/gsl_spmatrix.h>
-//#include <gsl/gsl_vector.h>
+#include <gsl/gsl_spmatrix.h>
+#include <gsl/gsl_vector.h>
 #include "timer.h"
 #include "spmv.h"
 #include "csr.h"
@@ -91,6 +91,13 @@ int main(int argc, char *argv[])
   // Dense computation using CBLAS (eg. GSL's CBLAS implementation)
   //
   printf("Dense computation\n----------------\n");
+
+  timeinfo start, now;
+  timestamp(&start);
+
+  cblas_dgemv(CblasRowMajor, CblasNoTrans, size, size, 1.0, mat, size, vec, 1, 0.0, refsol, 1);
+
+  timestamp(&now);
 
   printf("Time taken by CBLAS dense computation: %ld ms\n", diff_milli(&start, &now));
 

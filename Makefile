@@ -1,11 +1,21 @@
-spmv: link
+TARGETS = release debug
+CC = gcc
+CFLAGS = -Wall -Wextra
+LDLIBS= -lm -lopenblas
+SRCS = my_dense.c my_sparse.c timer.c csr.c spmv.c
+OBJS = $(SRCS:.c=.o)
+OBJS_DBG = $(SRCS:.c=_dbg.o)
 
-	./spmv
+all: $(TARGETS)
 
-link: compile
+%.o: %.c
+	$(CC) $(CFLAGS) -O2 -c $<
 
-	gcc my_dense.o my_sparse.o timer.o csr.o spmv.o -lopenblas -lm -o spmv
+%_dbg.o: %.c
+	$(CC) $(CFLAGS) -g -O0 -c -o $@ $<
 
-compile: 
+release: $(OBJS)
+debug: $(OBJS_DBG)
 
-	make my_dense.o my_sparse.o timer.o csr.o spmv.o
+$(TARGETS):
+	$(CC) $^ $(LDFLAGS) $(LDLIBS) -o $@
