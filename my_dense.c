@@ -9,13 +9,12 @@ int my_dense(const unsigned int n, const double mat[], double vec[], double resu
   double tmp = 0.0;
   //Assuming an NxN matrix 
   while(row_offset <= size){
-  	for (j; j < row_offset ; j++){
+  	for (; j < row_offset ; j++)
 		tmp += mat[j] * vec[j%n];
-
-	}
 	result[z] = tmp;
 	tmp=0;
 	++z;
 	row_offset += n;
   }
+  return 0;
 }

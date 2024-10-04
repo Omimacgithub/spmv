@@ -8,6 +8,7 @@
 #include "spmv.h"
 //#include "csr.h"
 
+
 #define DEFAULT_SIZE 1024
 #define DEFAULT_DENSITY 0.25
 
@@ -74,7 +75,8 @@ int main(int argc, char *argv[])
     density = atoi(argv[2]);
   }
 
-  gsl_spmatrix *m = gsl_spmatrix_alloc(size, size);	   // Matrix into CSR format
+  gsl_spmatrix *m = gsl_spmatrix_compress(gsl_spmatrix_alloc(size, size), GSL_SPMATRIX_CSR); //gsl_spmatrix in CSR format
+  gsl_spmatrix *src = gsl_spmatrix_alloc(size, size);	   // gsl_spmatrix 
   double *mat, *vec, *refsol, *mysol;
 
   mat = (double *) malloc(size * size * sizeof(double));
@@ -125,27 +127,57 @@ int main(int argc, char *argv[])
   // Convert mat to a sparse format: CSR
   // Use the gsl_spmatrix struct as datatype
   //m = intoCSR(size, mat);
+  double value;
+  int i, j;
+  for (i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            value = mat[i * size + j];
+            if (value != 0.0) {
+                gsl_spmatrix_set(src, i, j, value);
+            }
+        }
+    }
 
+  //Store CSR matrix in m
+  gsl_spmatrix_csr(m, src);
   //
   // Sparse computation using GSL's sparse algebra functions
   //
+  
+  gsl_vector *x = gsl_vector_alloc(size);
+
+  for (i = 0; i < size; i++) {
+  	gsl_vector_set(x, i, vec[i]);
+  }
+
+  gsl_vector *y = gsl_vector_alloc(size);
+  gsl_vector_set_zero(y);
+
+  //Matrix-vector operation in the form: y = alpha*m*x + beta*y
+  //alpha = 1 and beta = 0
+
+  timestamp(&start);
+
+  //Result stored in y gsl_vector
+  gsl_spblas_dgemv(CblasNoTrans, 1.0, m, x, 0.0, y);
+
+  timestamp(&now);
+  printf("Time taken by GSL sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+
+  for(i=0; i < size; i++){
+	mysol[i] = gsl_vector_get(y, i);
+  }
+
+  if (check_result(refsol, mysol, size) == 1)
+    printf("Result is ok!\n");
+  else
+    printf("Result is wrong!\n");
 
   //
   // Your own sparse implementation
   //
 
-  double value;
-  int i, j;
-  for (i = 0; i < size; i++) {
-        for (j = 0; j < size; j++) {
-            value = mat[i * size + j]; 
-            if (value != 0.0) {
-                gsl_spmatrix_set(m, i, j, value); 
-            }
-        }
-    }
-
-
+  // Compare times (and computation correctness!)
   timestamp(&start);
 
   my_sparse(size, m, vec, mysol);
@@ -158,14 +190,15 @@ int main(int argc, char *argv[])
   else
     printf("Result is wrong!\n");
 
-  // Compare times (and computation correctness!)
 
   // Free resources
   free(mat);
   free(vec);
   free(refsol);
   free(mysol);
-  gsl_spmatrix_free(sp_matrix);
-
+  gsl_spmatrix_free(m);
+  gsl_spmatrix_free(src);
+  gsl_vector_free(x);
+  gsl_vector_free(y);
   return 0;
 }
