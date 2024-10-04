@@ -18,7 +18,32 @@ This code is intended to use in the course HPCTools
 
 ## Runing the code
 
-Compile, link and execute;
 ~~~shell
 make
+~~~
+
+This will create two executables, one named **release** (with -O2 CFLAG) and another named **debug** (with -O0 and -g3 CFLAGs).
+
+To only create **release**:
+
+~~~shell
+make release
+~~~
+
+To only create **debug**:
+
+~~~shell
+make debug
+~~~
+
+If you want to remove created object files (.o):
+
+~~~shell
+make clean
+~~~
+
+If you want to remove created object files (.o) **and executable files**:
+
+~~~shell
+make cleanall
 ~~~
