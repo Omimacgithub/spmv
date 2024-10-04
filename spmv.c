@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     density = DEFAULT_DENSITY;
   } else {
     size = atoi(argv[1]);
-    density = atoi(argv[2]);
+    density = (double) atoi(argv[2]) / 100.0;
   }
 
   double *mat, *vec, *refsol, *mysol;
