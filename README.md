@@ -47,3 +47,6 @@ If you want to remove created object files (.o) **and executable files**:
 ~~~shell
 make cleanall
 ~~~
+
+In **junkfiles** directory there's stuff no longer needed.
+
