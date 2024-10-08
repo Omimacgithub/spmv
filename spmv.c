@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     density = DEFAULT_DENSITY;
   } else {
     size = atoi(argv[1]);
-    density = atoi(argv[2]);
+    density = (double) atoi(argv[2]) / 100.0;
   }
 
   gsl_spmatrix *m = gsl_spmatrix_compress(gsl_spmatrix_alloc(size, size), GSL_SPMATRIX_CSR); //gsl_spmatrix in CSR format
