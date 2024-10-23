@@ -3,7 +3,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra
 LDLIBS= -lm -lgsl -lopenblas
 
-SRCS = my_dense.c my_sparse.c timer.c spmv.c
+SRCS = my_dense.c my_csr.c my_csc.c timer.c spmv.c
 OBJS = $(SRCS:.c=.o)
 OBJS_DBG = $(SRCS:.c=_dbg.o)
 

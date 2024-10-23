@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
   //Store CSR matrix in m
   gsl_spmatrix_csr(m, src);
   //
-  // Sparse computation using GSL's sparse algebra functions
+  // csr computation using GSL's sparse algebra functions
   //
   
   gsl_vector *x = gsl_vector_alloc(size);
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
   gsl_spblas_dgemv(CblasNoTrans, 1.0, m, x, 0.0, y);
 
   timestamp(&now);
-  printf("Time taken by GSL sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+  printf("Time taken by GSL (CSR) sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
 
   for(i=0; i < size; i++){
 	mysol[i] = gsl_vector_get(y, i);
@@ -174,22 +174,70 @@ int main(int argc, char *argv[])
     printf("Result is wrong!\n");
 
   //
-  // Your own sparse implementation
+  // Your own csr implementation
   //
 
   // Compare times (and computation correctness!)
   timestamp(&start);
 
-  my_sparse(size, m, vec, mysol);
+  my_csr(size, m, vec, mysol);
 
   timestamp(&now);
-  printf("Time taken by my sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+  printf("Time taken by my csr matrix - vector product: %ld ms\n", diff_milli(&start, &now));
 
   if (check_result(refsol, mysol, size) == 1)
     printf("Result is ok!\n");
   else
     printf("Result is wrong!\n");
 
+//Free and reinitialize stuff
+
+  gsl_spmatrix_free(m);
+
+  m = gsl_spmatrix_compress(gsl_spmatrix_alloc(size, size), GSL_SPMATRIX_CSC); //gsl_spmatrix in CSC format
+
+  //Store CSC matrix in m
+  gsl_spmatrix_csc(m, src);
+  //
+  // csc computation using GSL's sparse algebra functions
+  //
+  
+  //Matrix-vector operation in the form: y = alpha*m*x + beta*y
+  //alpha = 1 and beta = 0
+
+  timestamp(&start);
+
+  //Result stored in y gsl_vector
+  gsl_spblas_dgemv(CblasNoTrans, 1.0, m, x, 0.0, y);
+
+  timestamp(&now);
+  printf("Time taken by GSL (CSC) sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+
+  for(i=0; i < size; i++){
+	mysol[i] = gsl_vector_get(y, i);
+  }
+
+  if (check_result(refsol, mysol, size) == 1)
+    printf("Result is ok!\n");
+  else
+    printf("Result is wrong!\n");
+
+  //
+  // Your own csc implementation
+  //
+
+  // Compare times (and computation correctness!)
+  timestamp(&start);
+
+  my_csc(size, m, vec, mysol);
+
+  timestamp(&now);
+  printf("Time taken by my csc matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+
+  if (check_result(refsol, mysol, size) == 1)
+    printf("Result is ok!\n");
+  else
+    printf("Result is wrong!\n");
 
   // Free resources
   free(mat);
