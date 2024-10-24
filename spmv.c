@@ -239,6 +239,48 @@ int main(int argc, char *argv[])
   else
     printf("Result is wrong!\n");
 
+  //
+  // COO computation using GSL's sparse algebra functions
+  //
+  
+  //Matrix-vector operation in the form: y = alpha*m*x + beta*y
+  //alpha = 1 and beta = 0
+
+  timestamp(&start);
+
+  //Result stored in y gsl_vector
+  gsl_spblas_dgemv(CblasNoTrans, 1.0, src, x, 0.0, y);
+
+  timestamp(&now);
+  printf("Time taken by GSL (COO) sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+
+  for(i=0; i < size; i++){
+	mysol[i] = gsl_vector_get(y, i);
+  }
+
+  if (check_result(refsol, mysol, size) == 1)
+    printf("Result is ok!\n");
+  else
+    printf("Result is wrong!\n");
+
+  //
+  // Your own coo implementation
+  //
+
+  // Compare times (and computation correctness!)
+  timestamp(&start);
+
+  my_coo(size, src, vec, mysol);
+
+  timestamp(&now);
+  printf("Time taken by my coo matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+
+  if (check_result(refsol, mysol, size) == 1)
+    printf("Result is ok!\n");
+  else
+    printf("Result is wrong!\n");
+
+
   // Free resources
   free(mat);
   free(vec);
