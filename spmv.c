@@ -1,13 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <gsl/gsl_cblas.h>      // CBLAS in GSL (the GNU Scientific Library)
-#include <gsl/gsl_spmatrix.h>
-#include <gsl/gsl_vector.h>
-#include "timer.h"
-#include "spmv.h"
-//#include "csr.h"
+#ifdef _GSL_
+  #include <gsl/gsl_cblas.h>      // CBLAS in GSL (the GNU Scientific Library)
+  #include <gsl/gsl_spmatrix.h>
+  #include <gsl/gsl_vector.h>
+  #include "spmv.h"
+#endif
+#ifdef _MKL_
+  #include <mkl.h>
+  #include "spmv_mkl.h"
+#endif
 
+#include "timer.h"
+//#include "csr.h"
+/* Docs:
+ * MKL matrix manipulation: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-fortran/2023-1/matrix-manipulation-routines.html
+ * MKL COO sparse matrix datatype: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2024-1/sparse-blas-coordinate-matrix-storage-format.html
+ * */
 
 #define DEFAULT_SIZE 1024
 #define DEFAULT_DENSITY 0.25
@@ -63,6 +73,8 @@ int main(int argc, char *argv[])
   int size;        // number of rows and cols (size x size matrix)
   double density;  // aprox. ratio of non-zero values
   //csr m;
+  double value;
+  int i, j;
 
   if (argc < 2) {
     size = DEFAULT_SIZE;
@@ -74,9 +86,7 @@ int main(int argc, char *argv[])
     size = atoi(argv[1]);
     density = (double) atoi(argv[2]) / 100.0;
   }
-
-  gsl_spmatrix *m = gsl_spmatrix_compress(gsl_spmatrix_alloc(size, size), GSL_SPMATRIX_CSR); //gsl_spmatrix in CSR format
-  gsl_spmatrix *src = gsl_spmatrix_alloc(size, size);	   // gsl_spmatrix 
+  
   double *mat, *vec, *refsol, *mysol;
 
   mat = (double *) malloc(size * size * sizeof(double));
@@ -102,8 +112,12 @@ int main(int argc, char *argv[])
 
   timestamp(&now);
 
-  printf("Time taken by CBLAS dense computation: %ld ms\n", diff_milli(&start, &now));
-
+  #ifdef _GSL_
+  printf("Time taken by CBLAS (GSL) dense computation: %ld ms\n", diff_milli(&start, &now));
+  #endif
+  #ifdef _MKL_
+  printf("Time taken by CBLAS (MKL) dense computation: %ld ms\n", diff_milli(&start, &now));
+  #endif
   //
   // Using your own dense implementation
   //
@@ -119,7 +133,6 @@ int main(int argc, char *argv[])
   else
     printf("Result is wrong!\n");
 
-
   //
   // Let's try now SpMV: Sparse Matrix - Dense Vector computation
   //
@@ -127,8 +140,10 @@ int main(int argc, char *argv[])
   // Convert mat to a sparse format: CSR
   // Use the gsl_spmatrix struct as datatype
   //m = intoCSR(size, mat);
-  double value;
-  int i, j;
+ 
+  #ifdef _GSL_
+  gsl_spmatrix *m = gsl_spmatrix_compress(gsl_spmatrix_alloc(size, size), GSL_SPMATRIX_CSR); //gsl_spmatrix in CSR format
+  gsl_spmatrix *src = gsl_spmatrix_alloc(size, size);	   // gsl_spmatrix 
   for (i = 0; i < size; i++) {
         for (j = 0; j < size; j++) {
             value = mat[i * size + j];
@@ -137,7 +152,6 @@ int main(int argc, char *argv[])
             }
         }
     }
-
   //Store CSR matrix in m
   gsl_spmatrix_csr(m, src);
   //
@@ -152,6 +166,40 @@ int main(int argc, char *argv[])
 
   gsl_vector *y = gsl_vector_alloc(size);
   gsl_vector_set_zero(y);
+  #endif
+  
+ 
+  #ifdef _MKL_
+  MKL_INT row_ind[nnz]; 
+  MKL_INT col_ind[nnz];
+  int u=0;
+  double values[nnz];
+  for (i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            value = mat[i * size + j];
+            if (value != 0.0) {
+	      values[u]=value;
+	      row_ind[u]=i;
+	      col_ind[u]=j;
+	      u++;
+            }
+        }
+    }
+  sparse_matrix_t src;
+  sparse_matrix_t m;
+  sparse_status_t status;
+
+  status = mkl_sparse_d_create_coo(&src, SPARSE_INDEX_BASE_ZERO, size, size, nnz, row_ind, col_ind, values);
+  if (status != SPARSE_STATUS_SUCCESS) {
+        printf("Error creating the matrix\n");
+        return 1;
+  }
+  status = mkl_sparse_convert_csr(src, SPARSE_OPERATION_NON_TRANSPOSE, &m);
+  if (status != SPARSE_STATUS_SUCCESS) {
+        printf("Error creating the matrix\n");
+        return 1;
+  }
+  #endif
 
   //Matrix-vector operation in the form: y = alpha*m*x + beta*y
   //alpha = 1 and beta = 0
@@ -159,15 +207,28 @@ int main(int argc, char *argv[])
   timestamp(&start);
 
   //Result stored in y gsl_vector
+  #ifdef _GSL_
   gsl_spblas_dgemv(CblasNoTrans, 1.0, m, x, 0.0, y);
+  #endif
+  #ifdef _MKL_
+  // y = m*x
+  char uplo = 'L';
+  //TODO: EXTRAER row offsets y column indices
+  //Docs: https://www.smcm.iqfr.csic.es/docs/intel/mkl/mkl_manual/bla/functn_mkl_cspblas_dcsrsymv.htm
+  //mkl_cspblas_dcsrsymv(&uplo, &size, m);
+  #endif
 
   timestamp(&now);
-  printf("Time taken by GSL (CSR) sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
 
+  #ifdef _GSL_
+  printf("Time taken by GSL (CSR) sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
   for(i=0; i < size; i++){
 	mysol[i] = gsl_vector_get(y, i);
   }
+  #endif
 
+  
+  
   if (check_result(refsol, mysol, size) == 1)
     printf("Result is ok!\n");
   else
@@ -180,10 +241,20 @@ int main(int argc, char *argv[])
   // Compare times (and computation correctness!)
   timestamp(&start);
 
+  #ifdef _GSL_
   my_csr(size, m, vec, mysol);
+  #endif
+  #ifdef _MKL_
+  my_csr(size, &m, vec, mysol);
+  #endif
 
   timestamp(&now);
-  printf("Time taken by my csr matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+  #ifdef _GSL_
+  printf("Time taken by my csr matrix (GSL) - vector product: %ld ms\n", diff_milli(&start, &now));
+  #endif
+  #ifdef _MKL_
+  printf("Time taken by my csr matrix (MKL)- vector product: %ld ms\n", diff_milli(&start, &now));
+  #endif
 
   if (check_result(refsol, mysol, size) == 1)
     printf("Result is ok!\n");
@@ -192,12 +263,12 @@ int main(int argc, char *argv[])
 
 //Free and reinitialize stuff
 
+  #ifdef _GSL_
   gsl_spmatrix_free(m);
-
   m = gsl_spmatrix_compress(gsl_spmatrix_alloc(size, size), GSL_SPMATRIX_CSC); //gsl_spmatrix in CSC format
-
   //Store CSC matrix in m
   gsl_spmatrix_csc(m, src);
+  #endif
   //
   // csc computation using GSL's sparse algebra functions
   //
@@ -207,15 +278,19 @@ int main(int argc, char *argv[])
 
   timestamp(&start);
 
+  #ifdef _GSL_
   //Result stored in y gsl_vector
   gsl_spblas_dgemv(CblasNoTrans, 1.0, m, x, 0.0, y);
+  #endif
 
   timestamp(&now);
+  #ifdef _GSL_
   printf("Time taken by GSL (CSC) sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
 
   for(i=0; i < size; i++){
 	mysol[i] = gsl_vector_get(y, i);
   }
+  #endif
 
   if (check_result(refsol, mysol, size) == 1)
     printf("Result is ok!\n");
@@ -229,10 +304,17 @@ int main(int argc, char *argv[])
   // Compare times (and computation correctness!)
   timestamp(&start);
 
+  #ifdef _GSL_
   my_csc(size, m, vec, mysol);
+  #endif
 
   timestamp(&now);
-  printf("Time taken by my csc matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+  #ifdef _GSL_
+  printf("Time taken by my csc matrix (GSL) - vector product: %ld ms\n", diff_milli(&start, &now));
+  #endif
+  #ifdef _MKL_
+  printf("Time taken by my csc matrix (MKL) - vector product: %ld ms\n", diff_milli(&start, &now));
+  #endif
 
   if (check_result(refsol, mysol, size) == 1)
     printf("Result is ok!\n");
@@ -249,14 +331,19 @@ int main(int argc, char *argv[])
   timestamp(&start);
 
   //Result stored in y gsl_vector
+  #ifdef _GSL_
   gsl_spblas_dgemv(CblasNoTrans, 1.0, src, x, 0.0, y);
+  #endif
 
   timestamp(&now);
+
+  #ifdef _GSL_
   printf("Time taken by GSL (COO) sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
 
   for(i=0; i < size; i++){
 	mysol[i] = gsl_vector_get(y, i);
   }
+  #endif
 
   if (check_result(refsol, mysol, size) == 1)
     printf("Result is ok!\n");
@@ -268,12 +355,46 @@ int main(int argc, char *argv[])
   //
 
   // Compare times (and computation correctness!)
+  /*
+  #ifdef _MKL_
+  MKL_INT row_ind[nnz]; 
+  MKL_INT col_ind[nnz];
+  int u=0;
+  double values[nnz];
+  for (i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            value = mat[i * size + j];
+            if (value != 0.0) {
+	      values[u]=value;
+	      row_ind[u]=i;
+	      col_ind[u]=j;
+	      u++;
+            }
+        }
+    }
+  sparse_matrix_t m;
+  sparse_status_t status;
+
+  status = mkl_sparse_d_create_coo(&m, SPARSE_INDEX_BASE_ZERO, size, size, nnz, row_ind, col_ind, values);
+  if (status != SPARSE_STATUS_SUCCESS) {
+        printf("Error creating the matrix\n");
+        return 1;
+  }
+  #endif
+  */
   timestamp(&start);
 
+  #ifdef _GSL_
   my_coo(size, src, vec, mysol);
+  #endif
 
   timestamp(&now);
-  printf("Time taken by my coo matrix - vector product: %ld ms\n", diff_milli(&start, &now));
+  #ifdef _GSL_
+  printf("Time taken by my coo matrix (GSL) - vector product: %ld ms\n", diff_milli(&start, &now));
+  #endif
+  #ifdef _MKL_
+  printf("Time taken by my coo matrix (MKL) - vector product: %ld ms\n", diff_milli(&start, &now));
+  #endif
 
   if (check_result(refsol, mysol, size) == 1)
     printf("Result is ok!\n");
@@ -286,9 +407,15 @@ int main(int argc, char *argv[])
   free(vec);
   free(refsol);
   free(mysol);
+  #ifdef _GSL_
   gsl_spmatrix_free(m);
   gsl_spmatrix_free(src);
   gsl_vector_free(x);
   gsl_vector_free(y);
+  #endif
+  #ifdef _MKL_
+  //TODO: free things
+  #endif
+
   return 0;
 }

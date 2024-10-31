@@ -1,29 +1,33 @@
-TARGETS = release debug
+#module load cesga/2022 iimkl
+TARGETS = gsl mkl
 CC = gcc
-CFLAGS = -Wall -Wextra
-LDLIBS= -lm -lgsl -lopenblas
+ICC = icc
+CFLAGS = -O0 -Wall -Wextra -D_GSL_
+IFLAGS = -O0 -Wall -Wextra -D_MKL_ -I"${MKLROOT}/include" -diag-disable=10441
+LDLIBS = -lm -lgsl -lopenblas
+ILDLIBS = -L"${MKLROOT}/lib/intel64" -lm -qmkl
 
-SRCS = my_dense.c my_csr.c my_csc.c my_coo.c timer.c spmv.c
-OBJS = $(SRCS:.c=.o)
-OBJS_DBG = $(SRCS:.c=_dbg.o)
+ISRCS = timer.c my_dense.c my_csr.c spmv.c
+SRCS = timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c
+IOBJS = $(ISRCS:.c=.o)
+OBJS = $(SRCS:.c=_g.o)
 
 all: $(TARGETS)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -O2 -c $<
+gsl: $(OBJS) 	
+	$(CC) $(CFLAGS) $^ $(LDLIBS) -o $@
+mkl: $(IOBJS)
+	$(ICC) $(IFLAGS) $^ $(ILDLIBS) -o $@
 
-%_dbg.o: %.c
-	$(CC) $(CFLAGS) -O0 -g3 -c -o $@ $<
+$(IOBJS): $(ISRCS)
+	$(ICC) $(IFLAGS) $^ -c
 
-release: $(OBJS)
-debug: $(OBJS_DBG)
-
-$(TARGETS):
-	$(CC) $^ $(LDFLAGS) $(LDLIBS) -o $@
-
-clean:
-	$(RM) $(OBJS) $(OBJS_DBG) *~
+%_g.o: %.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 cleanall:
-	$(RM) $(OBJS) $(OBJS_DBG) debug release *~
+	$(RM) $(OBJS) $(IOBJS) release *~
+
+#cleanall:
+#	$(RM) $(OBJS) $(OBJS_DBG) debug release *~
 

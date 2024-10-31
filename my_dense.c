@@ -1,4 +1,9 @@
-#include "spmv.h"
+#ifdef _GSL_
+  #include "spmv.h"
+#endif
+#ifdef _MKL_
+  #include "spmv_mkl.h"
+#endif
 #include <math.h>
 #include <stdio.h>
 
