@@ -27,16 +27,17 @@ int my_coo(const unsigned int n, gsl_spmatrix *m, double vec[], double result[])
 #endif
 
 #ifdef _MKL_
-int my_coo(const unsigned int n, MKL_INT *rows_indx, MKL_INT *cols_indx, const double *values, double vec[], double result[])
+//int my_coo(const unsigned int n, MKL_INT *rows_indx, MKL_INT *cols_indx, const double *values, double vec[], double result[])
+int my_coo(const unsigned int n, sparse_matrix_t *m, double vec[], double result[])
 {
   // code your own solver
-  /*sparse_index_base_t indexing;
+  sparse_index_base_t indexing;
   MKL_INT nrows, ncols, nnz;
   const MKL_INT *rows_indx, *cols_indx;
-  const double *values;*/
+  const double *values;
   
   //You CANNOT access to the elements of sparse_matrix_t by hand (are opaque)
-  //mkl_sparse_d_export_coo(m, &indexing, &nrows, &ncols, &nnz, &rows_indx, &cols_indx, &values);
+  mkl_sparse_d_export_coo(m, &indexing, &nrows, &ncols, &nnz, &rows_indx, &cols_indx, &values);
 
   int i;
   //m->values = values
