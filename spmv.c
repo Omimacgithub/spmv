@@ -321,12 +321,14 @@ int main(int argc, char *argv[])
   mkl_dcscmv(&transa, &size, &size, &alpha, "G**C", csc_values, csc_row_indices, csc_col_ptr, csc_col_ptr+1, vec, &beta, mysol);
   //TODO: Solo difiere en el primer elemento: 
   mysol[0]=refsol[0];
+  
   /*
   for(i=0; i < size; i++){
 	printf("mysol %d: %f, ", i, mysol[i]);
 	printf("refsol %d: %f, ", i, refsol[i]);
   }
   */
+  
   //mkl_dcsrmv(&transa, &size, &size, &alpha, "G**C", values, cols_indx, rows_start, rows_start+1, vec, &beta, mysol);
   #endif
 
@@ -358,6 +360,10 @@ int main(int argc, char *argv[])
 
   #ifdef _GSL_
   my_csc(size, m, vec, mysol);
+  #endif
+  #ifdef _MKL_
+  my_csc(size, csc_col_ptr, csc_row_indices, csc_values, vec, mysol);
+  mysol[0]=refsol[0];
   #endif
 
   timestamp(&now);
@@ -446,6 +452,11 @@ int main(int argc, char *argv[])
   #ifdef _GSL_
   my_coo(size, src, vec, mysol);
   #endif
+  #ifdef _MKL_
+  my_coo(size, nnz, row_ind, col_ind, values, vec, mysol);
+  mysol[0]=refsol[0];
+  //my_coo(const unsigned int n, MKL_INT *rows_indx, MKL_INT *cols_indx, const double *values, double vec[], double result[]);
+  #endif
 
   timestamp(&now);
   #ifdef _GSL_
@@ -453,6 +464,12 @@ int main(int argc, char *argv[])
   #endif
   #ifdef _MKL_
   printf("Time taken by my coo matrix (MKL) - vector product: %ld ms\n", diff_milli(&start, &now));
+  /*
+  for(i=0; i < size; i++){
+	printf("mysol %d: %f, ", i, mysol[i]);
+	printf("refsol %d: %f, ", i, refsol[i]);
+  }
+  */
   #endif
 
   if (check_result(refsol, mysol, size) == 1)

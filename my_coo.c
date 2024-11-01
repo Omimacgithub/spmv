@@ -1,10 +1,11 @@
-#include "spmv.h"
-//#include "csr.h"
 #ifdef _GSL_
+#include "spmv.h"
+#include <stddef.h>
 #include <gsl/gsl_spmatrix.h>
 #endif
 #ifdef _MKL_
 #include <mkl.h>
+#include "spmv_mkl.h"
 #endif
 
 #ifdef _GSL_
@@ -27,25 +28,22 @@ int my_coo(const unsigned int n, gsl_spmatrix *m, double vec[], double result[])
 #endif
 
 #ifdef _MKL_
-//int my_coo(const unsigned int n, MKL_INT *rows_indx, MKL_INT *cols_indx, const double *values, double vec[], double result[])
-int my_coo(const unsigned int n, sparse_matrix_t *m, double vec[], double result[])
+int my_coo(const unsigned int n, const unsigned int nnz, MKL_INT *rows_indx, MKL_INT *cols_indx, const double *values, double vec[], double result[])
 {
   // code your own solver
-  sparse_index_base_t indexing;
-  MKL_INT nrows, ncols, nnz;
-  const MKL_INT *rows_indx, *cols_indx;
-  const double *values;
+  //sparse_index_base_t indexing;
+  //MKL_INT nrows, ncols, nnz;
+  //const MKL_INT *rows_indx, *cols_indx;
+  //const double *values;
+
   
   //You CANNOT access to the elements of sparse_matrix_t by hand (are opaque)
-  mkl_sparse_d_export_coo(m, &indexing, &nrows, &ncols, &nnz, &rows_indx, &cols_indx, &values);
+  //mkl_sparse_d_export_coo(m, &indexing, &nrows, &ncols, &nnz, &rows_indx, &cols_indx, &values);
 
   int i;
-  //m->values = values
-  //m->columns = column_indices
-  //m->rows = row_indices
-  //Docs: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2024-1/sparse-blas-coordinate-matrix-storage-format.html 
-  for (i=0; i < n; i++)
+  for(i=0; i < n; i++)
   	result[i]=0;
+
   for(i=0; i < nnz; i++)
 	result[rows_indx[i]] += values[i] * vec[cols_indx[i]];
   
