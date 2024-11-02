@@ -1,12 +1,63 @@
 #!/bin/bash -l
 #Docs: https://cesga-docs.gitlab.io/ft3-user-guide/batch_examples.html
-#SBATCH -N 1                      #Nº de nodos (1)
 #SBATCH -n 1                     #Nº de tareas MPI/procesos (1)
-#SBATCH -c 1                      #Nº de cores por proceso/tarea (1)
-#SBATCH --ntasks-per-node=1	  #Nº de tareas por nodo (1)
 #SBATCH --time=0-00:10:00
-#SBATCH --mem=200G
+#SBATCH --mem=8G
 
+SIZE=16384
+DENSITY=10
+
+#Load icc and mkl
 module load cesga/2022 iimkl
 
-./mkl 16384
+make cleanall
+make OFLAGS="-O0"
+
+echo "-------------------------------"
+echo "--------Results with -O0-------"
+echo "-------------------------------"
+
+echo "-------------GSL---------------"
+./gsl $SIZE $DENSITY
+
+echo "-------------MKL---------------"
+./mkl $SIZE $DENSITY
+
+make cleanall
+make gsl OFLAGS="-O2"
+make mkl OFLAGS="-no-vec -no-simd"
+echo "-------------------------------"
+echo "-----Results with -O2-novec----"
+echo "-------------------------------"
+
+echo "-------------GSL---------------"
+./gsl $SIZE $DENSITY
+
+echo "-------------MKL---------------"
+./mkl $SIZE $DENSITY
+
+make cleanall
+make OFLAGS="-O3"
+echo "-------------------------------"
+echo "--------Results with -O3-------"
+echo "-------------------------------"
+
+echo "-------------GSL---------------"
+./gsl $SIZE $DENSITY
+
+echo "-------------MKL---------------"
+./mkl $SIZE $DENSITY
+
+make cleanall
+make gsl OFLAGS="-Ofast"
+make mkl OFLAGS="-fast"
+
+echo "-------------------------------"
+echo "------Results with -Ofast------"
+echo "-------------------------------"
+
+echo "-------------GSL---------------"
+./gsl $SIZE $DENSITY
+
+echo "-------------MKL---------------"
+./mkl $SIZE $DENSITY

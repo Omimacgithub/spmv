@@ -200,10 +200,11 @@ int main(int argc, char *argv[])
         return 1;
   }
   sparse_index_base_t indexing;
+  double *csr_values;
   MKL_INT nrows, ncols; 
   MKL_INT *rows_start, *rows_end, *cols_indx;
 
-  mkl_sparse_d_export_csr(m, &indexing, &nrows, &ncols, &rows_start, &rows_end, &cols_indx, &values);
+  mkl_sparse_d_export_csr(m, &indexing, &nrows, &ncols, &rows_start, &rows_end, &cols_indx, &csr_values);
   #endif
 
   //Matrix-vector operation in the form: y = alpha*m*x + beta*y
@@ -219,14 +220,16 @@ int main(int argc, char *argv[])
   //Matrix-vector operation in the form: y = alpha*m*x + beta*y
   //alpha = 1 and beta = 0
 
-  //Docs: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2023-2/mkl-csrmv.html
 
   char transa = 'N';
   double alpha = 1.0, beta= 0.0;
-  //mkl_cspblas_dcsrgemv(&transa, &size, values, rows_start, cols_indx, vec, mysol);
-  //
-  
-  mkl_dcsrmv(&transa, &size, &size, &alpha, "G**C", values, cols_indx, rows_start, rows_start+1, vec, &beta, mysol);
+  // Create matrix descriptor
+  struct matrix_descr descrA;
+  descrA.type = SPARSE_MATRIX_TYPE_GENERAL;
+  descrA.diag = SPARSE_DIAG_NON_UNIT;
+
+  //Docs: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2023-2/mkl-csrmv.html
+  mkl_sparse_d_mv(SPARSE_OPERATION_NON_TRANSPOSE, alpha, m, descrA, vec, beta, mysol);
 
   #endif
 
@@ -241,14 +244,12 @@ int main(int argc, char *argv[])
 
   #ifdef _MKL_
   printf("Time taken by MKL (CSR) sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
-  //TODO: Solo difiere en el primer elemento: mysol 0: -423.850760, refsol 0: -449.401124,
-  mysol[0]=refsol[0];
   /*
   for(i=0; i < size; i++){
 	printf("mysol %d: %f, ", i, mysol[i]);
 	printf("refsol %d: %f, ", i, refsol[i]);
   }
-  */
+ */ 
   #endif
   
   
@@ -293,15 +294,24 @@ int main(int argc, char *argv[])
   gsl_spmatrix_csc(m, src);
   #endif
   #ifdef _MKL_
-  //Docs: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2024-2/mkl-csrcsc.html
+
   MKL_INT job[6] = { 0, 0, 0, 0, nnz, 1 };
   double csc_values[nnz];
   MKL_INT csc_row_indices[nnz];
   MKL_INT csc_col_ptr[size + 1];
   MKL_INT info;
+  sparse_matrix_t cscA;
 
-  mkl_dcsrcsc(job, &size , values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
-
+  //Docs: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2024-2/mkl-csrcsc.html
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  status = mkl_sparse_d_create_csc( &cscA,
+                                      SPARSE_INDEX_BASE_ZERO,
+                                      size,    // number of rows
+                                      size,    // number of cols
+                                      csc_col_ptr,
+                                      csc_col_ptr+1,
+                                      csc_row_indices,
+                                      csc_values );
   #endif
   //
   // csc computation using GSL's sparse algebra functions
@@ -318,18 +328,8 @@ int main(int argc, char *argv[])
   #endif
 
   #ifdef _MKL_
-  mkl_dcscmv(&transa, &size, &size, &alpha, "G**C", csc_values, csc_row_indices, csc_col_ptr, csc_col_ptr+1, vec, &beta, mysol);
-  //TODO: Solo difiere en el primer elemento: 
-  mysol[0]=refsol[0];
-  
-  /*
-  for(i=0; i < size; i++){
-	printf("mysol %d: %f, ", i, mysol[i]);
-	printf("refsol %d: %f, ", i, refsol[i]);
-  }
-  */
-  
-  //mkl_dcsrmv(&transa, &size, &size, &alpha, "G**C", values, cols_indx, rows_start, rows_start+1, vec, &beta, mysol);
+  //https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2024-2/mkl-sparse-mm.html
+  mkl_sparse_d_mv(SPARSE_OPERATION_NON_TRANSPOSE, alpha, cscA, descrA, /*SPARSE_LAYOUT_COLUMN_MAJOR*/vec, beta, mysol);
   #endif
 
   timestamp(&now);
@@ -363,7 +363,6 @@ int main(int argc, char *argv[])
   #endif
   #ifdef _MKL_
   my_csc(size, csc_col_ptr, csc_row_indices, csc_values, vec, mysol);
-  mysol[0]=refsol[0];
   #endif
 
   timestamp(&now);
@@ -395,7 +394,6 @@ int main(int argc, char *argv[])
 
   #ifdef _MKL_
   mkl_dcoomv(&transa, &size, &size, &alpha, "G**C", values, row_ind, col_ind, &nnz, vec, &beta, mysol);
-  mysol[0]=refsol[0];
   #endif
   timestamp(&now);
 
@@ -420,33 +418,6 @@ int main(int argc, char *argv[])
   //
 
   // Compare times (and computation correctness!)
-  /*
-  #ifdef _MKL_
-  MKL_INT row_ind[nnz]; 
-  MKL_INT col_ind[nnz];
-  int u=0;
-  double values[nnz];
-  for (i = 0; i < size; i++) {
-        for (j = 0; j < size; j++) {
-            value = mat[i * size + j];
-            if (value != 0.0) {
-	      values[u]=value;
-	      row_ind[u]=i;
-	      col_ind[u]=j;
-	      u++;
-            }
-        }
-    }
-  sparse_matrix_t m;
-  sparse_status_t status;
-
-  status = mkl_sparse_d_create_coo(&m, SPARSE_INDEX_BASE_ZERO, size, size, nnz, row_ind, col_ind, values);
-  if (status != SPARSE_STATUS_SUCCESS) {
-        printf("Error creating the matrix\n");
-        return 1;
-  }
-  #endif
-  */
   timestamp(&start);
 
   #ifdef _GSL_
@@ -454,8 +425,6 @@ int main(int argc, char *argv[])
   #endif
   #ifdef _MKL_
   my_coo(size, nnz, row_ind, col_ind, values, vec, mysol);
-  mysol[0]=refsol[0];
-  //my_coo(const unsigned int n, MKL_INT *rows_indx, MKL_INT *cols_indx, const double *values, double vec[], double result[]);
   #endif
 
   timestamp(&now);
@@ -464,12 +433,6 @@ int main(int argc, char *argv[])
   #endif
   #ifdef _MKL_
   printf("Time taken by my coo matrix (MKL) - vector product: %ld ms\n", diff_milli(&start, &now));
-  /*
-  for(i=0; i < size; i++){
-	printf("mysol %d: %f, ", i, mysol[i]);
-	printf("refsol %d: %f, ", i, refsol[i]);
-  }
-  */
   #endif
 
   if (check_result(refsol, mysol, size) == 1)
