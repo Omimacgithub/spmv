@@ -3,8 +3,9 @@ TARGETS = gsl mkl
 CC = gcc
 ICC = icc
 OFLAGS = -O0
-CFLAGS = -Wall -Wextra -D_GSL_
-IFLAGS = -g3 -Wall -Wextra -D_MKL_ -I"${MKLROOT}/include" -diag-disable=10441
+WARNFLAGS = -Wall -Wextra
+CFLAGS = $(OFLAGS) $(WARNFLAGS) -D_GSL_
+IFLAGS = $(OFLAGS) $(WARNFLAGS) -D_MKL_ -I"${MKLROOT}/include" -diag-disable=10441
 LDLIBS = -lm -lgsl -lopenblas
 ILDLIBS = -lm -qmkl
 #ILDLIBS = -L"${MKLROOT}/lib/intel64" -lm -qmkl
@@ -17,9 +18,9 @@ OBJS = $(SRCS:.c=_g.o)
 all: $(TARGETS)
 
 gsl: $(OBJS) 	
-	$(CC) $(OFLAGS) $(CFLAGS) $^ $(LDLIBS) -o $@
+	$(CC) $(CFLAGS) $^ $(LDLIBS) -o $@
 mkl: $(IOBJS)
-	$(ICC) $(OFLAGS) $(IFLAGS) $^ $(ILDLIBS) -o $@
+	$(ICC) $(IFLAGS) $^ $(ILDLIBS) -o $@
 
 $(IOBJS): $(ISRCS)
 	$(ICC) $(IFLAGS) $^ -c

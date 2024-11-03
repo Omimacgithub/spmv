@@ -32,21 +32,12 @@ int my_csc(const unsigned int n, gsl_spmatrix *m, double vec[], double result[])
 }
 #endif
 #ifdef _MKL_
-//int my_csc(const unsigned int n, sparse_matrix_t *m, double vec[], double result[])
 int my_csc(const unsigned int n, MKL_INT *cols_start, MKL_INT *rows_indx, const double *values, double vec[], double result[])
 {
   // code your own solver
   int i, j=0, k=0;
   for (i=0; i < n; i++)
   	result[i]=0;
-  /*
-   * sparse_index_base_t indexing;
-  MKL_INT nrows, ncols, nnz; 
-  MKL_INT *cols_start, *cols_end, *rows_indx;
-  double *values;
-
-  mkl_sparse_d_export_csc(*m, &indexing, &nrows, &ncols, &cols_start, &cols_end, &rows_indx, &values);
-  */
   for(i=0; i < n; i++){
   	if ((j = cols_start[i+1]) != cols_start[i]){
 		for(; k < j; k++){

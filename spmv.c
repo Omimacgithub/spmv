@@ -14,10 +14,6 @@
 
 #include "timer.h"
 //#include "csr.h"
-/* Docs:
- * MKL matrix manipulation: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-fortran/2023-1/matrix-manipulation-routines.html
- * MKL COO sparse matrix datatype: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2024-1/sparse-blas-coordinate-matrix-storage-format.html
- * */
 
 #define DEFAULT_SIZE 1024
 #define DEFAULT_DENSITY 0.25
@@ -169,6 +165,9 @@ int main(int argc, char *argv[])
   #endif
   
  
+  //Create sparse matrices:
+  //src: COO
+  //m: CSR
   #ifdef _MKL_
   MKL_INT row_ind[nnz]; 
   MKL_INT col_ind[nnz];
@@ -189,6 +188,7 @@ int main(int argc, char *argv[])
   sparse_matrix_t m;
   sparse_status_t status;
 
+  //MKL matrix manipulation: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-fortran/2023-1/matrix-manipulation-routines.html
   status = mkl_sparse_d_create_coo(&src, SPARSE_INDEX_BASE_ZERO, size, size, nnz, row_ind, col_ind, values);
   if (status != SPARSE_STATUS_SUCCESS) {
         printf("Error creating the matrix\n");
@@ -219,8 +219,6 @@ int main(int argc, char *argv[])
   #ifdef _MKL_
   //Matrix-vector operation in the form: y = alpha*m*x + beta*y
   //alpha = 1 and beta = 0
-
-
   char transa = 'N';
   double alpha = 1.0, beta= 0.0;
   // Create matrix descriptor
@@ -228,9 +226,13 @@ int main(int argc, char *argv[])
   descrA.type = SPARSE_MATRIX_TYPE_GENERAL;
   descrA.diag = SPARSE_DIAG_NON_UNIT;
 
-  //Docs: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2023-2/mkl-csrmv.html
-  mkl_sparse_d_mv(SPARSE_OPERATION_NON_TRANSPOSE, alpha, m, descrA, vec, beta, mysol);
+  //Docs: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2024-2/mkl-sparse-mv.html
+  status = mkl_sparse_d_mv(SPARSE_OPERATION_NON_TRANSPOSE, alpha, m, descrA, vec, beta, mysol);
 
+  if (status != SPARSE_STATUS_SUCCESS) {
+        printf(" Error in CSR mkl_sparse_d_mv: %d \n", status);
+	return 1;
+  }
   #endif
 
   timestamp(&now);
@@ -244,12 +246,6 @@ int main(int argc, char *argv[])
 
   #ifdef _MKL_
   printf("Time taken by MKL (CSR) sparse matrix - vector product: %ld ms\n", diff_milli(&start, &now));
-  /*
-  for(i=0; i < size; i++){
-	printf("mysol %d: %f, ", i, mysol[i]);
-	printf("refsol %d: %f, ", i, refsol[i]);
-  }
- */ 
   #endif
   
   
@@ -317,9 +313,6 @@ int main(int argc, char *argv[])
   // csc computation using GSL's sparse algebra functions
   //
   
-  //Matrix-vector operation in the form: y = alpha*m*x + beta*y
-  //alpha = 1 and beta = 0
-
   timestamp(&start);
 
   #ifdef _GSL_
@@ -328,8 +321,12 @@ int main(int argc, char *argv[])
   #endif
 
   #ifdef _MKL_
-  //https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2024-2/mkl-sparse-mm.html
-  mkl_sparse_d_mv(SPARSE_OPERATION_NON_TRANSPOSE, alpha, cscA, descrA, /*SPARSE_LAYOUT_COLUMN_MAJOR*/vec, beta, mysol);
+  status = mkl_sparse_d_mv(SPARSE_OPERATION_NON_TRANSPOSE, alpha, cscA, descrA, vec, beta, mysol);
+
+  if (status != SPARSE_STATUS_SUCCESS) {
+        printf(" Error in CSC mkl_sparse_d_mv: %d \n", status);
+	return 1;
+  }
   #endif
 
   timestamp(&now);
@@ -382,9 +379,6 @@ int main(int argc, char *argv[])
   // COO computation using GSL's sparse algebra functions
   //
   
-  //Matrix-vector operation in the form: y = alpha*m*x + beta*y
-  //alpha = 1 and beta = 0
-
   timestamp(&start);
 
   //Result stored in y gsl_vector
@@ -393,7 +387,12 @@ int main(int argc, char *argv[])
   #endif
 
   #ifdef _MKL_
-  mkl_dcoomv(&transa, &size, &size, &alpha, "G**C", values, row_ind, col_ind, &nnz, vec, &beta, mysol);
+  status = mkl_sparse_d_mv( SPARSE_OPERATION_NON_TRANSPOSE, alpha, src, descrA, vec, beta, mysol);
+  if (status != SPARSE_STATUS_SUCCESS) {
+        printf(" Error in COO mkl_sparse_d_mv: %d \n", status);
+	return 1;
+  }
+
   #endif
   timestamp(&now);
 
@@ -453,7 +452,11 @@ int main(int argc, char *argv[])
   gsl_vector_free(y);
   #endif
   #ifdef _MKL_
-  //TODO: free things
+  //Free things
+  mkl_sparse_destroy(src);
+  mkl_sparse_destroy(m);
+  mkl_sparse_destroy(cscA);
+  
   #endif
 
   return 0;

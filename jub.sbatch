@@ -37,7 +37,7 @@ echo "-------------MKL---------------"
 ./mkl $SIZE $DENSITY
 
 make cleanall
-make OFLAGS="-O3"
+make OFLAGS="-O3 -march=native"
 echo "-------------------------------"
 echo "--------Results with -O3-------"
 echo "-------------------------------"
@@ -49,8 +49,8 @@ echo "-------------MKL---------------"
 ./mkl $SIZE $DENSITY
 
 make cleanall
-make gsl OFLAGS="-Ofast"
-make mkl OFLAGS="-fast"
+make gsl OFLAGS="-Ofast -march=native"
+make mkl OFLAGS="-march=native -fast"
 
 echo "-------------------------------"
 echo "------Results with -Ofast------"
