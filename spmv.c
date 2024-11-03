@@ -205,6 +205,13 @@ int main(int argc, char *argv[])
   MKL_INT *rows_start, *rows_end, *cols_indx;
 
   mkl_sparse_d_export_csr(m, &indexing, &nrows, &ncols, &rows_start, &rows_end, &cols_indx, &csr_values);
+
+  char transa = 'N';
+  double alpha = 1.0, beta= 0.0;
+  // Create matrix descriptor
+  struct matrix_descr descrA;
+  descrA.type = SPARSE_MATRIX_TYPE_GENERAL;
+  descrA.diag = SPARSE_DIAG_NON_UNIT;
   #endif
 
   //Matrix-vector operation in the form: y = alpha*m*x + beta*y
@@ -219,12 +226,6 @@ int main(int argc, char *argv[])
   #ifdef _MKL_
   //Matrix-vector operation in the form: y = alpha*m*x + beta*y
   //alpha = 1 and beta = 0
-  char transa = 'N';
-  double alpha = 1.0, beta= 0.0;
-  // Create matrix descriptor
-  struct matrix_descr descrA;
-  descrA.type = SPARSE_MATRIX_TYPE_GENERAL;
-  descrA.diag = SPARSE_DIAG_NON_UNIT;
 
   //Docs: https://www.intel.com/content/www/us/en/docs/onemkl/developer-reference-c/2024-2/mkl-sparse-mv.html
   status = mkl_sparse_d_mv(SPARSE_OPERATION_NON_TRANSPOSE, alpha, m, descrA, vec, beta, mysol);
