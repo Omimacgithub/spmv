@@ -5,7 +5,7 @@ OFLAGS = -O0
 WARNFLAGS = -Wall -Wextra
 CFLAGS = $(OFLAGS) $(WARNFLAGS) -D_GSL_
 IFLAGS = $(OFLAGS) $(WARNFLAGS) -D_MKL_ -I"${MKLROOT}/include" -diag-disable=10441
-LDLIBS = -lm -lgsl -lopenblas
+LDLIBS = -lm -lgsl -lgslcblas
 ILDLIBS = -lm -qmkl
 
 SRCS = timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c

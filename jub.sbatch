@@ -1,8 +1,9 @@
 #!/bin/bash -l
 #Docs: https://cesga-docs.gitlab.io/ft3-user-guide/batch_examples.html
-#SBATCH -n 1                     #Nº de tareas MPI/procesos (1)
+#SBATCH -n 1                     #Nº of MPI/process tasks (1)
 #SBATCH --time=0-00:10:00
 #SBATCH --mem=8G
+#SBATCH --exclusive              #Allocate an exclusive node (for execution time fidelity)
 
 SIZE=16384
 DENSITY=10
