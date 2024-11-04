@@ -1,6 +1,7 @@
 # SpMV: Sparse Matrix-Vector product
 ## Table of contents:
 
+- [Authors](#authors)
 - [Task](#task)
 - [Running the code](#running-the-code)
   - [Makefile](#makefile)
@@ -9,6 +10,11 @@
   - [Params](#params)
   - [Times](#times)
 - [NOTE](#note)
+
+## Authors
+
+- Omar Montenegro Macía
+- Emilio J. Padrón González (provider of the [code skeleton](https://gitlab.citic.udc.es/emilio.padron/spmv))
 
 ## Task
 
@@ -89,6 +95,8 @@ The following experiment was done with the following parameters:
 ### Times
 
 All times are denoted **in miliseconds (ms)**.
+
+The **Ref** column shows the execution time of GSL or MKL library function for each optimization level respectively.
 
 | **GSL (GCC)** | O0  | O2-novec | O3-vec | Ofast-vec | Ref             |
 | ------------- | --- | -------- | ------ | --------- | --------------- |
