@@ -91,6 +91,9 @@ The following experiment was done with the following parameters:
 - O3-vec level: -O3 (vectorization enabled) -march=native (let know the compiler what kind of instructions it can emit when generating assembly code)
 - Ofast-vec level (gcc): -Ofast -march=native
 - fast level (icc): -march=native -fast (if we swap the flags, icc produces the following warning: "overriding '-(null)' with '-march=native'")
+- Libraries: -lm
+  - GSL: -lgslcblas (for dense matrix vector multiplication) -lgsl (for sparse matrix vector multiplication)
+  - MKL: -qmkl
 
 ### Times
 
