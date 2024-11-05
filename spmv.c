@@ -122,7 +122,13 @@ int main(int argc, char *argv[])
   my_dense(size, mat, vec, mysol);
 
   timestamp(&now);
-  printf("Time taken by my dense matrix-vector product: %ld ms\n", diff_milli(&start, &now));
+  #ifdef _GSL_
+  printf("Time taken by my dense matrix-vector product (GSL): %ld ms\n", diff_milli(&start, &now));
+  #endif
+
+  #ifdef _MKL_
+  printf("Time taken by my dense matrix-vector product (MKL): %ld ms\n", diff_milli(&start, &now));
+  #endif
 
   if (check_result(refsol, mysol, size) == 1)
     printf("Result is ok!\n");
@@ -274,7 +280,7 @@ int main(int argc, char *argv[])
   printf("Time taken by my csr matrix (GSL) - vector product: %ld ms\n", diff_milli(&start, &now));
   #endif
   #ifdef _MKL_
-  printf("Time taken by my csr matrix (MKL)- vector product: %ld ms\n", diff_milli(&start, &now));
+  printf("Time taken by my csr matrix (MKL) - vector product: %ld ms\n", diff_milli(&start, &now));
   #endif
 
   if (check_result(refsol, mysol, size) == 1)
