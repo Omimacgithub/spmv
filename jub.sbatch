@@ -40,7 +40,6 @@ done
 
 # Execute the C program multiple times
 for (( i=1; i<=num_executions; i++ )); do
-    # Replace './path/to/your/c_program' with the actual command to run your C program
     make cleanall
     make OFLAGS="-O0"
 
@@ -123,7 +122,6 @@ done
 
 # Calculate and print mean times
 for metric in "${metrics[@]}"; do
-#    if [[ ${count["$metric"]} -gt 0 ]]; then
 	echo "------------------------"
 	echo "-----------O0-----------"
 	echo "------------------------"
@@ -148,8 +146,5 @@ for metric in "${metrics[@]}"; do
 
         mean_time=$(echo "scale=2; ${execution_times_fast["$metric"]} / $num_executions " | bc)
         echo "Mean time for $metric: $mean_time ms"
-#    else
-#        echo "No data collected for $metric"
-#    fi
 done
 
