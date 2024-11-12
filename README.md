@@ -101,21 +101,21 @@ The experiment was done with the following parameters:
 
 The times reflected in the 2 following tables are the **mean of executing the same program 3 times**. All times are denoted **in miliseconds (ms)**.
 
-The **Ref** column shows the execution time of GSL or MKL library function for each optimization level respectively separated by a slash (/).
+The **Ref** column shows the execution time of GSL or MKL library function (already compiled and optimized).
 
 | **GSL (GCC)** | O0  | O2-novec | O3-vec | Ofast-vec | Ref             |
 | ------------- | --- | -------- | ------ | --------- | --------------- |
-| my_dense      | 879.33 | 587      | 587    | 587       | 398.66/399/398.66/399 |
-| my_coo        | 140.33 | 86.33       | 87     | 87        | 87/87/87/87     |
-| my_csr        | 88.66  | 40       | 40     | 73.66        | 40.33/40/40.33/40     |
-| my_csc        | 119.66 | 35.66       | 36     | 35.66        | 36/36/36/36     |
+| my_dense      | 879.33 | 587      | 587    | 587       | 398.66 |
+| my_coo        | 140.33 | 86.33       | 87     | 87        | 87     |
+| my_csr        | 88.66  | 40       | 40     | 73.66        | 40.33     |
+| my_csc        | 119.66 | 35.66       | 36     | 35.66        | 36     |
 
 | **MKL (ICC)** | O0  | O2-novec | O3-vec | fast | Ref             |
 | ------------- | --- | -------- | ------ | ---- | --------------- |
-| my_dense      | 888 | 588      | 587.33    | 590.33  | 176.66/152/152.66/189.66 |
-| my_coo        | 112.33 | 87       | 86.66     | 86.66   | 114.33/113.33/113.33/113.33 |
-| my_csr        | 88.33  | 29       | 25.66     | 25   | 39/38.66/38.33/39     |
-| my_csc        | 102.66 | 35.66       | 34.66     | 32   | 32/32/33/32     |
+| my_dense      | 888 | 588      | 587.33    | 590.33  | 189.66 |
+| my_coo        | 112.33 | 87       | 86.66     | 86.66   | 114.33 |
+| my_csr        | 88.33  | 29       | 25.66     | 25   | 39     |
+| my_csc        | 102.66 | 35.66       | 34.66     | 32   | 32  |
 
 ## NOTE
 
