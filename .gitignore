@@ -3,3 +3,6 @@ intel
 spmv
 debug
 release
+cachegrind.out*
+callgrind.out*
+ipo_out.optrpt

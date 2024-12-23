@@ -144,7 +144,8 @@ int main(int argc, char *argv[])
   //m = intoCSR(size, mat);
  
   #ifdef _GSL_
-  gsl_spmatrix *m = gsl_spmatrix_compress(gsl_spmatrix_alloc(size, size), GSL_SPMATRIX_CSR); //gsl_spmatrix in CSR format
+  gsl_spmatrix *org = gsl_spmatrix_alloc(size, size);
+  gsl_spmatrix *m = gsl_spmatrix_compress(org, GSL_SPMATRIX_CSR); //gsl_spmatrix in CSR format
   gsl_spmatrix *src = gsl_spmatrix_alloc(size, size);	   // gsl_spmatrix 
   for (i = 0; i < size; i++) {
         for (j = 0; j < size; j++) {
@@ -180,6 +181,7 @@ int main(int argc, char *argv[])
   int u=0;
   double values[nnz];
   for (i = 0; i < size; i++) {
+        //Loop time consuming
         for (j = 0; j < size; j++) {
             value = mat[i * size + j];
             if (value != 0.0) {
@@ -200,6 +202,7 @@ int main(int argc, char *argv[])
         printf("Error creating the matrix\n");
         return 1;
   }
+  //Esta función provoca leaks
   status = mkl_sparse_convert_csr(src, SPARSE_OPERATION_NON_TRANSPOSE, &m);
   if (status != SPARSE_STATUS_SUCCESS) {
         printf("Error creating the matrix\n");
@@ -292,7 +295,7 @@ int main(int argc, char *argv[])
 
   #ifdef _GSL_
   gsl_spmatrix_free(m);
-  m = gsl_spmatrix_compress(gsl_spmatrix_alloc(size, size), GSL_SPMATRIX_CSC); //gsl_spmatrix in CSC format
+  m = gsl_spmatrix_compress(org, GSL_SPMATRIX_CSC); //gsl_spmatrix in CSC format
   //Store CSC matrix in m
   gsl_spmatrix_csc(m, src);
   #endif
@@ -454,14 +457,15 @@ int main(int argc, char *argv[])
   free(mysol);
   #ifdef _GSL_
   gsl_spmatrix_free(m);
+  gsl_spmatrix_free(org);
   gsl_spmatrix_free(src);
   gsl_vector_free(x);
   gsl_vector_free(y);
   #endif
   #ifdef _MKL_
   //Free things
-  mkl_sparse_destroy(src);
   mkl_sparse_destroy(m);
+  mkl_sparse_destroy(src);
   mkl_sparse_destroy(cscA);
   
   #endif
