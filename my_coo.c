@@ -30,13 +30,10 @@ int my_coo(const unsigned int n, gsl_spmatrix *m, double vec[], double result[])
 #ifdef _MKL_
 int my_coo(const unsigned int n, const unsigned int nnz, MKL_INT *rows_indx, MKL_INT *cols_indx, const double *values, double vec[], double result[])
 {
-  // code your own solver
-  
-
   int i;
   for(i=0; i < n; i++)
   	result[i]=0;
-
+  //#pragma loop count (n)
   for(i=0; i < nnz; i++)
 	result[rows_indx[i]] += values[i] * vec[cols_indx[i]];
   
