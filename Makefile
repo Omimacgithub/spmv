@@ -1,15 +1,14 @@
 TARGETS = gsl mkl
 CC = gcc
 ICC = icx
-OFLAGS = -march=native -g3 -O3
+OFLAGS = -O3 -march=native #-mtune=icelake-server
 WARNFLAGS = -Wall -Wextra
-CFLAGS =  $(OFLAGS) $(CVEC) $(WARNFLAGS) -D_GSL_
-IFLAGS =  $(OFLAGS) $(WARNFLAGS) $(ADVFLAGS) -D_MKL_ 
-ADVFLAGS = -Rpass-analysis=loop-vectorize -Rpass=loop-vectorize -Rpass-missed=loop-vectorize -qopt-report=3 -vec -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread 
-#ADVFLAGS = -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread
-CVEC = -fopt-info-optall-all -ffast-math -ftree-loop-vectorize
+IVEC = -Rpass=loop-vectorize -vec #-Rpass-analysis=loop-vectorize -Rpass-missed=loop-vectorize
+CVEC = -fopt-info-vec-optimized #-fopt-info-vec-missed -fvect-cost-model=unlimited -ffast-math
+CFLAGS =  $(OFLAGS) $(WARNFLAGS) $(CVEC) -D_GSL_
+IFLAGS =  $(OFLAGS) $(WARNFLAGS) $(IVEC) -D_MKL_ 
 LDLIBS = -lm -lgsl -lgslcblas
-ILDLIBS = -lm -lmkl
+ILDLIBS = -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl
 
 SRCS = timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c
 IOBJS = $(SRCS:.c=.o)

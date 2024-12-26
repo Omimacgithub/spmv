@@ -13,7 +13,7 @@
 int my_csr(const unsigned int n, /*csr m*/const gsl_spmatrix *m, const double vec[], double result[])
 {
   // code your own solver
-  int i, j=0, k=0, z=0;
+  unsigned int i, j=0, k=0;
   double tmp=0.0;
   //m->data = values
   //m->p = row_offsets
@@ -38,32 +38,24 @@ int my_csr(const unsigned int n, /*csr m*/const gsl_spmatrix *m, const double ve
 int my_csr(const unsigned int n, sparse_matrix_t *m, double vec[], double result[])
 {
   // code your own solver
-  int i, j=0, k=0, z=0;
+  unsigned int i, j=0, k=0;
   double tmp=0.0;
   sparse_index_base_t indexing;
-  MKL_INT nrows, ncols, nnz; 
+  MKL_INT nrows, ncols; 
   MKL_INT *rows_start, *rows_end, *cols_indx;
   double *values;
 
   //You CANNOT access to the elements of sparse_matrix_t by hand (are opaque)
   mkl_sparse_d_export_csr(*m, &indexing, &nrows, &ncols, &rows_start, &rows_end, &cols_indx, &values);
-
   for(i=0; i < n; i++){
-  	if ((j = rows_start[i+1]) != rows_start[i]){
-  //#pragma vector always
-		for(; k < j; k++){
-			tmp += values[k] * vec[cols_indx[k]];
-		}
-		result[z] = tmp;
-		tmp = 0;
-		++z;
+	j = rows_start[i+1];
+	for(k=rows_start[i]; k < j; k++){
+		tmp += values[k] * vec[cols_indx[k]];
 	}
-	else {
-		result[z] = tmp;
-		++z;
-	}
-  
+	result[i] = tmp;
+	tmp = 0;
   }
+  
   return 0;
 }
 #endif

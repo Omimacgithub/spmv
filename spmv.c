@@ -229,7 +229,6 @@ int main(int argc, char *argv[])
 
   mkl_sparse_d_export_csr(m, &indexing, &nrows, &ncols, &rows_start, &rows_end, &cols_indx, &csr_values);
 
-  char transa = 'N';
   double alpha = 1.0, beta= 0.0;
   // Create matrix descriptor
   struct matrix_descr descrA;
