@@ -1,6 +1,7 @@
 #!/bin/bash -l
 #Docs: https://cesga-docs.gitlab.io/ft3-user-guide/batch_examples.html
 #SBATCH -n 1                     #Nº of MPI/process tasks (1)
+#SBATCH -o gsl_%j.o
 #SBATCH --time=0-00:20:00
 #SBATCH --mem=8G
 #SBATCH --exclusive              #Allocate an exclusive node (for execution time fidelity)
@@ -8,8 +9,8 @@
 SIZE=16384
 DENSITY=10
 
-#Load icc and mkl
-module load cesga/2022 iimkl
+module load cesga/2022 gcc/12.3.0
+gcc --version
 
 # Number of executions
 num_executions=3
@@ -24,11 +25,7 @@ declare -A execution_times_fast
 metrics=("CBLAS (GSL) dense computation" "my dense matrix-vector product (GSL)" \
          "GSL (CSR) sparse matrix - vector product" "my csr matrix (GSL) - vector product" \
          "GSL (CSC) sparse matrix - vector product" "my csc matrix (GSL) - vector product" \
-         "GSL (COO) sparse matrix - vector product" "my coo matrix (GSL) - vector product" \
-	 "CBLAS (MKL) dense computation" "my dense matrix-vector product (MKL)" \
-         "MKL (CSR) sparse matrix - vector product" "my csr matrix (MKL) - vector product" \
-         "MKL (CSC) sparse matrix - vector product" "my csc matrix (MKL) - vector product" \
-         "MKL (COO) sparse matrix - vector product" "my coo matrix (MKL) - vector product")
+         "GSL (COO) sparse matrix - vector product" "my coo matrix (GSL) - vector product")
 # Initialize counts to zero
 for metric in "${metrics[@]}"; do
     execution_times_O0["$metric"]=0
@@ -41,9 +38,9 @@ done
 # Execute the C program multiple times
 for (( i=1; i<=num_executions; i++ )); do
     make cleanall
-    make OFLAGS="-O0"
+    make gsl OFLAGS="-O0" CVEC=""
 
-    output=$(./gsl $SIZE $DENSITY && ./mkl $SIZE $DENSITY)
+    output=$(./gsl $SIZE $DENSITY)
 
    echo "-------------------------------"
    echo "--------Results with -O0-------"
@@ -61,10 +58,9 @@ for (( i=1; i<=num_executions; i++ )); do
     done <<< "$output"
 
     make cleanall
-    make gsl OFLAGS="-O2"
-    make mkl OFLAGS="-no-vec -no-simd"
+    make gsl OFLAGS="-O2" CVEC=""
 
-    output=$(./gsl $SIZE $DENSITY && ./mkl $SIZE $DENSITY)
+    output=$(./gsl $SIZE $DENSITY)
 
    echo "-------------------------------"
    echo "-----Results with -O2-novec----"
@@ -81,9 +77,9 @@ for (( i=1; i<=num_executions; i++ )); do
     done <<< "$output"
 
     make cleanall
-    make OFLAGS="-O3 -march=native"
+    make gsl OFLAGS="-O3 -march=native" 
 
-    output=$(./gsl $SIZE $DENSITY && ./mkl $SIZE $DENSITY)
+    output=$(./gsl $SIZE $DENSITY)
 
    echo "-------------------------------"
    echo "--------Results with -O3-------"
@@ -101,9 +97,8 @@ for (( i=1; i<=num_executions; i++ )); do
 
     make cleanall
     make gsl OFLAGS="-Ofast -march=native"
-    make mkl OFLAGS="-march=native -fast"
 
-    output=$(./gsl $SIZE $DENSITY && ./mkl $SIZE $DENSITY)
+    output=$(./gsl $SIZE $DENSITY)
 
    echo "-------------------------------"
    echo "-------Results with -Ofast-----"

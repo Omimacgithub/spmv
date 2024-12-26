@@ -1,10 +1,10 @@
 TARGETS = gsl mkl
 CC = gcc
 ICC = icx
-OFLAGS = -O3 -march=native #-mtune=icelake-server
+OFLAGS = -O0#-O3 -march=native #-mtune=icelake-server
 WARNFLAGS = -Wall -Wextra
-IVEC = -vec -Rpass=loop-vectorize #-Rpass-analysis=loop-vectorize -Rpass-missed=loop-vectorize
-CVEC = -fopt-info-vec-optimized -ffast-math #-fopt-info-vec-missed -fvect-cost-model=unlimited #-ffast-math
+#IVEC = -vec -Rpass=loop-vectorize #-Rpass-analysis=loop-vectorize -Rpass-missed=loop-vectorize
+#CVEC = -fopt-info-vec-optimized -ffast-math #-fopt-info-vec-missed -fvect-cost-model=unlimited #-ffast-math
 CFLAGS =  $(OFLAGS) $(WARNFLAGS) $(CVEC) -D_GSL_
 IFLAGS =  $(OFLAGS) $(WARNFLAGS) $(IVEC) -D_MKL_ 
 LDLIBS = -lm -lgsl -lgslcblas
