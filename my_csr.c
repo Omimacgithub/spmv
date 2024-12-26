@@ -10,7 +10,7 @@
 //#include "csr.h"
 
 #ifdef _GSL_
-int my_csr(const unsigned int n, /*csr m*/const gsl_spmatrix *m, const double vec[], double result[])
+int my_csr(const unsigned int n, const gsl_spmatrix *m, const double vec[], double result[])
 {
   // code your own solver
   unsigned int i, j=0, k=0;
@@ -35,7 +35,7 @@ int my_csr(const unsigned int n, /*csr m*/const gsl_spmatrix *m, const double ve
 }
 #endif
 #ifdef _MKL_
-int my_csr(const unsigned int n, sparse_matrix_t *m, double vec[], double result[])
+int my_csr(const unsigned int n, const sparse_matrix_t *m, const double vec[], double result[])
 {
   // code your own solver
   unsigned int i, j=0, k=0;

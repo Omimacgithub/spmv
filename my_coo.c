@@ -9,7 +9,7 @@
 #endif
 
 #ifdef _GSL_
-int my_coo(const unsigned int n, gsl_spmatrix *m, double vec[], double result[])
+int my_coo(const unsigned int n, const gsl_spmatrix *m, const double vec[], double result[])
 
 {
   // code your own solver
@@ -28,12 +28,11 @@ int my_coo(const unsigned int n, gsl_spmatrix *m, double vec[], double result[])
 #endif
 
 #ifdef _MKL_
-int my_coo(const unsigned int n, const unsigned int nnz, MKL_INT *rows_indx, MKL_INT *cols_indx, const double *values, double vec[], double result[])
+int my_coo(const unsigned int n, const unsigned int nnz, const MKL_INT *rows_indx, const MKL_INT *cols_indx, const double *values, const double vec[], double result[])
 {
   unsigned int i;
-  for(i=0; i < n; i++)
+  for (i=0; i < n; i++)
   	result[i]=0;
-  //#pragma loop count (n)
   for(i=0; i < nnz; i++)
 	result[rows_indx[i]] += values[i] * vec[cols_indx[i]];
   

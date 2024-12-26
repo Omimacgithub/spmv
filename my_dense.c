@@ -7,7 +7,7 @@
 #include <math.h>
 #include <stdio.h>
 
-int my_dense(const unsigned int n, const double *restrict mat, double *restrict vec, double *restrict result)
+int my_dense(const unsigned int n, const double *restrict mat, const double *restrict vec, double *restrict result)
 {
   // code your own solver
   unsigned int i, j;

@@ -283,9 +283,6 @@ int main(int argc, char *argv[])
 
   // Compare times (and computation correctness!)
   
-  #ifdef _GSL_
-  gsl_vector_set_zero(y);
-  #endif
   timestamp(&start);
 
   #ifdef _GSL_
@@ -298,11 +295,6 @@ int main(int argc, char *argv[])
   timestamp(&now);
   #ifdef _GSL_
   printf("Time taken by my csr matrix (GSL) - vector product: %ld ms\n", diff_milli(&start, &now));
-  /*
-  for(i=0; i < size; i++){
-	mysol[i] = gsl_vector_get(y, i);
-  }
-  */
   #endif
   #ifdef _MKL_
   printf("Time taken by my csr matrix (MKL) - vector product: %ld ms\n", diff_milli(&start, &now));
@@ -316,10 +308,14 @@ int main(int argc, char *argv[])
 //Free and reinitialize stuff
 
   #ifdef _GSL_
+
   gsl_spmatrix_free(m);
   m = gsl_spmatrix_compress(org, GSL_SPMATRIX_CSC); //gsl_spmatrix in CSC format
   //Store CSC matrix in m
   gsl_spmatrix_csc(m, src);
+
+  //Reset results vector
+  gsl_vector_set_zero(y);
   #endif
   #ifdef _MKL_
 
