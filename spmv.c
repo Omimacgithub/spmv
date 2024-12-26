@@ -176,22 +176,28 @@ int main(int argc, char *argv[])
   //src: COO
   //m: CSR
   #ifdef _MKL_
-  MKL_INT row_ind[nnz]; 
-  MKL_INT col_ind[nnz];
+  MKL_INT *row_ind = (MKL_INT *)mkl_malloc(nnz * sizeof(MKL_INT), 64);
+  MKL_INT *col_ind = (MKL_INT *)mkl_malloc(nnz * sizeof(MKL_INT), 64);
   int u=0;
-  double values[nnz];
+  double *values = (double *) mkl_malloc(size * size * sizeof(double), 64);
+  MKL_INT *row_off = (MKL_INT *) mkl_calloc(sizeof(MKL_INT), size+1, 64);
+
   for (i = 0; i < size; i++) {
-        //Loop time consuming
         for (j = 0; j < size; j++) {
             value = mat[i * size + j];
             if (value != 0.0) {
 	      values[u]=value;
 	      row_ind[u]=i;
+	      row_off[i+1]++;
 	      col_ind[u]=j;
 	      u++;
             }
         }
     }
+    for (i = 1; i <= size; i++) {
+    	row_off[i] += row_off[i - 1];
+    }
+
   sparse_matrix_t src;
   sparse_matrix_t m;
   sparse_status_t status;
@@ -202,8 +208,16 @@ int main(int argc, char *argv[])
         printf("Error creating the matrix\n");
         return 1;
   }
-  //Esta función provoca leaks
-  status = mkl_sparse_convert_csr(src, SPARSE_OPERATION_NON_TRANSPOSE, &m);
+  //This function causes memory leaks: https://stackoverflow.com/questions/37395541/mkl-sparse-blas-segfault-when-transposing-csr-with-100m-rows
+  //status = mkl_sparse_convert_csr(src, SPARSE_OPERATION_NON_TRANSPOSE, &m);
+  status = mkl_sparse_d_create_csr (&m,
+                                       SPARSE_INDEX_BASE_ZERO,
+                                       size,  // number of rows
+                                       size,  // number of cols
+                                       row_off,
+                                       row_off+1,
+                                       col_ind,
+                                       values );
   if (status != SPARSE_STATUS_SUCCESS) {
         printf("Error creating the matrix\n");
         return 1;
@@ -269,6 +283,10 @@ int main(int argc, char *argv[])
   //
 
   // Compare times (and computation correctness!)
+  
+  #ifdef _GSL_
+  gsl_vector_set_zero(y);
+  #endif
   timestamp(&start);
 
   #ifdef _GSL_
@@ -281,6 +299,11 @@ int main(int argc, char *argv[])
   timestamp(&now);
   #ifdef _GSL_
   printf("Time taken by my csr matrix (GSL) - vector product: %ld ms\n", diff_milli(&start, &now));
+  /*
+  for(i=0; i < size; i++){
+	mysol[i] = gsl_vector_get(y, i);
+  }
+  */
   #endif
   #ifdef _MKL_
   printf("Time taken by my csr matrix (MKL) - vector product: %ld ms\n", diff_milli(&start, &now));
@@ -302,9 +325,9 @@ int main(int argc, char *argv[])
   #ifdef _MKL_
 
   MKL_INT job[6] = { 0, 0, 0, 0, nnz, 1 };
-  double csc_values[nnz];
-  MKL_INT csc_row_indices[nnz];
-  MKL_INT csc_col_ptr[size + 1];
+  double *csc_values = (double *) mkl_malloc(nnz*sizeof(double), 64);
+  MKL_INT *csc_row_indices = (MKL_INT *) mkl_malloc(nnz*sizeof(MKL_INT), 64);
+  MKL_INT *csc_col_ptr = (MKL_INT *) mkl_malloc((size + 1)*sizeof(MKL_INT), 64);
   MKL_INT info;
   sparse_matrix_t cscA;
 
@@ -464,10 +487,17 @@ int main(int argc, char *argv[])
   #endif
   #ifdef _MKL_
   //Free things
-  mkl_sparse_destroy(m);
-  mkl_sparse_destroy(src);
+  mkl_free(row_off);
+  mkl_free_buffers();
+  mkl_free(values);
+  mkl_free(row_ind);
+  mkl_free(col_ind);
+  mkl_free(csc_values);
+  mkl_free(csc_row_indices);
+  mkl_free(csc_col_ptr);
   mkl_sparse_destroy(cscA);
-  
+  mkl_sparse_destroy(src);
+  mkl_sparse_destroy(m);
   #endif
 
   return 0;

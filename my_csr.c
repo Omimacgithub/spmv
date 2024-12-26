@@ -10,7 +10,7 @@
 //#include "csr.h"
 
 #ifdef _GSL_
-int my_csr(const unsigned int n, /*csr m*/gsl_spmatrix *m, double vec[], double result[])
+int my_csr(const unsigned int n, /*csr m*/const gsl_spmatrix *m, const double vec[], double result[])
 {
   // code your own solver
   int i, j=0, k=0, z=0;
@@ -19,21 +19,16 @@ int my_csr(const unsigned int n, /*csr m*/gsl_spmatrix *m, double vec[], double 
   //m->p = row_offsets
   //m->i = column_indices
   //Docs: https://www.gnu.org/software/gsl/doc/html/spmatrix.html#c.gsl_spmatrix_csr
-  #pragma GCC ivdep
+  double *Md = m->data;
+  int *Mp = m->p, *Mi = m->i;
+
   for(i=0; i < n; i++){
-  	if ((j = m->p[i+1]) != m->p[i]){
-		for(; k < j; k++){
-			tmp += m->data[k] * vec[m->i[k]];
-		}
-		result[z] = tmp;
-		tmp = 0;
-		++z;
+	j = Mp[i+1];
+	for(k=Mp[i]; k < j; k++){
+		tmp += Md[k] * vec[Mi[k]];
 	}
-	else {
-		result[z] = tmp;
-		++z;
-	}
-  
+	result[i] = tmp;
+	tmp = 0;
   }
 
   return 0;

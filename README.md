@@ -93,7 +93,7 @@ The experiment was done with the following parameters:
 - fast level (icc): -march=native -fast (if we swap the flags order, icc produces the following warning: "overriding '-(null)' with '-march=native'")
 - Libraries: -lm
   - GSL: -lgslcblas (for dense matrix vector multiplication) -lgsl (for sparse matrix vector multiplication)
-  - MKL: -qmkl
+  - MKL: -lmkl
 - gcc version: 11.2.1 20220115 (Gentoo 11.2.1_p20220115 p4)
 - icc version: 2021.10.0 Build 20230609_000000
 

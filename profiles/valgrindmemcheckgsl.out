@@ -1,0 +1,40 @@
+==1395213== Memcheck, a memory error detector
+==1395213== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==1395213== Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
+==1395213== Command: ./gsl 16384 10
+==1395213== 
+==1395213== Warning: set address range perms: large range [0x59c76040, 0xd9c76040) (undefined)
+Matriz size: 16384 x 16384 (268435456 elements)
+26837519 non-zero elements (10.00%)
+
+Dense computation
+----------------
+Time taken by CBLAS (GSL) dense computation: 8461 ms
+Time taken by my dense matrix-vector product (GSL): 14624 ms
+Result is ok!
+==1395213== Warning: set address range perms: large range [0xb90b040, 0x3ec3e360) (undefined)
+==1395213== Warning: set address range perms: large range [0xe02de040, 0x113611360) (undefined)
+Time taken by GSL (CSR) sparse matrix - vector product: 933 ms
+Result is ok!
+Time taken by my csr matrix (GSL) - vector product: 1522 ms
+Result is ok!
+Time taken by GSL (CSC) sparse matrix - vector product: 981 ms
+Result is ok!
+Time taken by my csc matrix (GSL) - vector product: 1556 ms
+Result is ok!
+Time taken by GSL (COO) sparse matrix - vector product: 989 ms
+Result is ok!
+Time taken by my coo matrix (GSL) - vector product: 1681 ms
+Result is ok!
+==1395213== Warning: set address range perms: large range [0x59c76028, 0xd9c76058) (noaccess)
+==1395213== Warning: set address range perms: large range [0xb90b028, 0x3ec3e378) (noaccess)
+==1395213== Warning: set address range perms: large range [0xe02de028, 0x113611378) (noaccess)
+==1395213== 
+==1395213== HEAP SUMMARY:
+==1395213==     in use at exit: 0 bytes in 0 blocks
+==1395213==   total heap usage: 39 allocs, 39 frees, 5,369,614,744 bytes allocated
+==1395213== 
+==1395213== All heap blocks were freed -- no leaks are possible
+==1395213== 
+==1395213== For lists of detected and suppressed errors, rerun with: -s
+==1395213== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 11 from 6)
