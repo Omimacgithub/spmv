@@ -77,7 +77,7 @@ for (( i=1; i<=num_executions; i++ )); do
     done <<< "$output"
 
     make cleanall
-    make gsl OFLAGS="-O3 -march=native" 
+    make gsl OFLAGS="-O3 -march=native -mtune=icelake-server" 
 
     output=$(./gsl $SIZE $DENSITY)
 
@@ -96,7 +96,7 @@ for (( i=1; i<=num_executions; i++ )); do
     done <<< "$output"
 
     make cleanall
-    make gsl OFLAGS="-Ofast -march=native"
+    make gsl OFLAGS="-Ofast -march=native -mtune=icelake-server"
 
     output=$(./gsl $SIZE $DENSITY)
 

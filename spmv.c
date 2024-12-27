@@ -147,13 +147,16 @@ int main(int argc, char *argv[])
   gsl_spmatrix *org = gsl_spmatrix_alloc(size, size);
   gsl_spmatrix *m = gsl_spmatrix_compress(org, GSL_SPMATRIX_CSR); //gsl_spmatrix in CSR format
   gsl_spmatrix *src = gsl_spmatrix_alloc(size, size);	   // gsl_spmatrix 
+  double *M = mat;
+  
   for (i = 0; i < size; i++) {
         for (j = 0; j < size; j++) {
-            value = mat[i * size + j];
+            value = M[j];
             if (value != 0.0) {
                 gsl_spmatrix_set(src, i, j, value);
             }
         }
+	    M += size;
     }
   //Store CSR matrix in m
   gsl_spmatrix_csr(m, src);
@@ -176,15 +179,17 @@ int main(int argc, char *argv[])
   //src: COO
   //m: CSR
   #ifdef _MKL_
-  MKL_INT *row_ind = (MKL_INT *)mkl_malloc(nnz * sizeof(MKL_INT), 64);
-  MKL_INT *col_ind = (MKL_INT *)mkl_malloc(nnz * sizeof(MKL_INT), 64);
+  //Allocate an aligned memory buffer of 32 bytes (AVX2) with mkl_malloc
+  MKL_INT *row_ind = (MKL_INT *)mkl_malloc(nnz * sizeof(MKL_INT), 32);
+  MKL_INT *col_ind = (MKL_INT *)mkl_malloc(nnz * sizeof(MKL_INT), 32);
   int u=0;
-  double *values = (double *) mkl_malloc(size * size * sizeof(double), 64);
-  MKL_INT *row_off = (MKL_INT *) mkl_calloc(sizeof(MKL_INT), size+1, 64);
+  double *values = (double *) mkl_malloc(size * size * sizeof(double), 32);
+  MKL_INT *row_off = (MKL_INT *) mkl_calloc(sizeof(MKL_INT), size+1, 32);
+  double *M = mat;
 
   for (i = 0; i < size; i++) {
         for (j = 0; j < size; j++) {
-            value = mat[i * size + j];
+            value = M[j];
             if (value != 0.0) {
 	      values[u]=value;
 	      row_ind[u]=i;
@@ -193,6 +198,7 @@ int main(int argc, char *argv[])
 	      u++;
             }
         }
+	M += size;
     }
     for (i = 1; i <= size; i++) {
     	row_off[i] += row_off[i - 1];
@@ -320,9 +326,9 @@ int main(int argc, char *argv[])
   #ifdef _MKL_
 
   MKL_INT job[6] = { 0, 0, 0, 0, nnz, 1 };
-  double *csc_values = (double *) mkl_malloc(nnz*sizeof(double), 64);
-  MKL_INT *csc_row_indices = (MKL_INT *) mkl_malloc(nnz*sizeof(MKL_INT), 64);
-  MKL_INT *csc_col_ptr = (MKL_INT *) mkl_malloc((size + 1)*sizeof(MKL_INT), 64);
+  double *csc_values = (double *) mkl_malloc(nnz*sizeof(double), 32);
+  MKL_INT *csc_row_indices = (MKL_INT *) mkl_malloc(nnz*sizeof(MKL_INT), 32);
+  MKL_INT *csc_col_ptr = (MKL_INT *) mkl_malloc((size + 1)*sizeof(MKL_INT), 32);
   MKL_INT info;
   sparse_matrix_t cscA;
 

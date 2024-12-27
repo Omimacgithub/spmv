@@ -15,12 +15,14 @@ int my_dense(const unsigned int n, const double *restrict mat, const double *res
   double *m = (double *)__builtin_assume_aligned(mat, 32);
   double *v = (double *)__builtin_assume_aligned(vec, 32);
   double *r = (double *)__builtin_assume_aligned(result, 32);
-#pragma GCC ivdep
+  double *M = m;
+//#pragma GCC ivdep
   for (i=0; i < n; i++){
-  #pragma GCC ivdep
+  //#pragma GCC ivdep
     for (j=0; j < n ; j++){
-	tmp += m[i*n+j] * v[j];
+	tmp += M[j] * v[j];
     }
+    M += n;
 	r[i] = tmp;
 	tmp=0;
   }

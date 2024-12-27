@@ -59,7 +59,7 @@ for (( i=1; i<=num_executions; i++ )); do
     done <<< "$output"
 
     make cleanall
-    make mkl OFLAGS="-no-vec -no-simd" IVEC=""
+    make mkl OFLAGS="-O2 -no-vec" IVEC=""
 
     output=$(./mkl $SIZE $DENSITY)
 
@@ -78,7 +78,7 @@ for (( i=1; i<=num_executions; i++ )); do
     done <<< "$output"
 
     make cleanall
-    make mkl OFLAGS="-O3 -march=native" 
+    make mkl OFLAGS="-O3 -march=native -mtune=icelake-server" 
 
     output=$(./mkl $SIZE $DENSITY)
 
@@ -97,7 +97,7 @@ for (( i=1; i<=num_executions; i++ )); do
     done <<< "$output"
 
     make cleanall
-    make mkl OFLAGS="-march=native -fast"
+    make mkl OFLAGS="-march=native -mtune=icelake-server -fast"
 
     output=$(./mkl $SIZE $DENSITY)
 
