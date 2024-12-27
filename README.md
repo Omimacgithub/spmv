@@ -3,6 +3,7 @@
 
 - [Authors](#authors)
 - [Task](#task)
+- [Tags](#tags)
 - [Running the code](#running-the-code)
   - [Makefile](#makefile)
   - [Sbatch job](#sbatch-job)
@@ -34,6 +35,12 @@ GSL also provides functions to help convert you dense matrices into a sparse for
 
 This code is intended to use in the course HPCTools
 
+## Tags
+2 tags were created. One tag (called OPTIM) is the optimized version of the code and the other tag (called T2) is the baseline version. To switch between them:
+~~~shell
+git checkout OPTIM/T2
+~~~
+
 ## Running the code
 
 ### Makefile
@@ -41,7 +48,7 @@ This code is intended to use in the course HPCTools
 make
 ~~~
 
-This will create two executables, one named **GSL** (compiled with gcc) and another named **MKL** (with icc).
+This will create two executables, one named **GSL** (compiled with gcc) and another named **MKL** (with icx).
 
 To only create **GSL**:
 
@@ -91,11 +98,25 @@ The experiment was done with the following parameters:
 - O3-vec level: -O3 (vectorization enabled) -march=native (let know the compiler what kind of instructions it can emit when generating assembly code)
 - Ofast-vec level (gcc): -Ofast -march=native
 - fast level (icc): -march=native -fast (if we swap the flags order, icc produces the following warning: "overriding '-(null)' with '-march=native'")
-- Libraries: -lm
+- Libraries: -lm. In addition:
   - GSL: -lgslcblas (for dense matrix vector multiplication) -lgsl (for sparse matrix vector multiplication)
   - MKL: -lmkl
 - gcc version: 11.2.1 20220115 (Gentoo 11.2.1_p20220115 p4)
 - icc version: 2021.10.0 Build 20230609_000000
+
+For the **OPTIM** version, the following changes were applied:
+- O2-novec level:
+  - **ICX**: -O2 -no-vec
+- O3-vec level: -O3 -march=native -mtune=icelake-server (the compiler can make smarter decisions, only applies to ice lake microarchitecture processors). In addition:
+  - GCC: -fopt-info-vec-optimized (report flags) -ffast-math
+  - ICX: -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize (report flags) -vec
+- Ofast-vec level (gcc): -Ofast -march=native -mtune=icelake-server -fopt-info-vec-optimized (report flags) -ffast-math.
+- fast level (icx): -march=native -mtune=icelake-server -fast (if we swap the flags order, icc produces the following warning: "overriding '-(null)' with '-march=native'") -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize (report flags) -vec
+- Libraries: -lm. In addition:
+  - GSL: -lgslcblas (for dense matrix vector multiplication) -lgsl (for sparse matrix vector multiplication)
+  - MKL: -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lmkl
+- gcc version: 12.3.0
+- icx version: Intel(R) oneAPI DPC++/C++ Compiler 2021.3.0 (2021.3.0.20210619)
 
 ### Times
 
@@ -117,6 +138,20 @@ The **Ref** column shows the execution time of GSL or MKL library function (alre
 | my_csr        | 88.33  | 29       | 25.66     | 25   | 39     |
 | my_csc        | 102.66 | 35.66       | 34.66     | 32   | 32  |
 
+There were improvements in the **OPTIM** version for **my_dense** kernel:
+
+| **GSL (GCC)** | O0  | O2-novec | O3-vec | Ofast-vec | Ref             |
+| ------------- | --- | -------- | ------ | --------- | --------------- |
+| my_dense      | 876 | **399**      | **142.66**    | **142.66**       | 398.66 |
+
+| **MKL (ICX)** | O0  | O2-novec | O3-vec | fast | Ref             |
+| ------------- | --- | -------- | ------ | ---- | --------------- |
+| my_dense      | 882.66 | **307.66**      | **143.00**    | **122.33**  | **140.66** |
+
+**my_csr** kernel performance is **worsened by autovectorization**, you need to disable autovectorization in this kernel (intel provides #pragma novector) in order to restore the previous performance.
+
 ## NOTE
+
+In **profiles** directory there's files like Intel Advisor roofline reports, Valgrind memchecks, and so on.
 
 In **junkfiles** directory there's stuff no longer needed.
