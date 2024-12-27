@@ -76,12 +76,12 @@ make cleanall
 
 ### Sbatch job
 
-To perform the benchmark task, I created the file **jub.sbatch** to launch in FT3 the same program several times, each one with a different optimization level. The script launch the experiment **3 times** (the times the experiment is executed is controlled by the variable **num_executions**) and calculate the mean of all execution times.
+I created 2 files to launch in FT3 the same program several times, each one with a different optimization level. The script launch the experiment **3 times** (the times the experiment is executed is controlled by the variable **num_executions**) and calculate the mean of all execution times. **gsl.sbatch** launch the experiment using gcc and **gsl library** and **mkl.sbatch** the same with icx compiler and **mkl library**.
 
 Just launch the following command:
 
 ~~~shell
-sbatch jub.sbatch
+sbatch <gsl or mkl>.sbatch
 ~~~
 
 ## GCC and ICC Benchmark
