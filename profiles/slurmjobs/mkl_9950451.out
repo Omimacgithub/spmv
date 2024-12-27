@@ -1,0 +1,593 @@
+slurmstepd: info: Setting TMPDIR to /scratch/9950451. Previous errors about TMPDIR can be discarded
+/home/ulc/cursos/curso347/.bashrc: line 26: /opt/xilinx/xrt/setup.sh: No such file or directory
+cesga/2020 unloaded
+        Preparing the environment for use of the CESGA 2020 software stack.
+        Please rebuild modules cache: module --ignore-cache avail
+     
+cesga/2020 loaded
+gcccore/system loaded
+intel/2021.3.0 loaded
+
+imkl/2021.3.0 loaded
+Intel(R) oneAPI DPC++/C++ Compiler 2021.3.0 (2021.3.0.20210619)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /mnt/netapp1/Optcesga_FT2_RHEL7/2020/software/Core/intel/2021.3.0/compiler/2021.3.0/linux/bin
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -O0 -Wall -Wextra  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+1 warning generated.
+icx -O0 -Wall -Wextra  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+--------Results with -O0-------
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 210 ms Time taken by my dense matrix-vector product (MKL): 895 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 38 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 89 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 82 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 95 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -O2 -no-vec -Wall -Wextra  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+1 warning generated.
+icx -O2 -no-vec -Wall -Wextra  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+-----Results with -O2-novec----
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 143 ms Time taken by my dense matrix-vector product (MKL): 308 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 39 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 31 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 36 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 87 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -O3 -march=native -mtune=icelake-server -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+my_dense.c:22:5: remark: vectorized loop (vectorization width: 4, interleaved count: 4) [-Rpass=loop-vectorize]
+    for (j=0; j < n ; j++){
+    ^
+my_csr.c:52:2: remark: vectorized loop (vectorization width: 4, interleaved count: 4) [-Rpass=loop-vectorize]
+        for(k=rows_start[i]; k < j; k++){
+        ^
+my_coo.c:36:3: remark: loop not vectorized: cannot identify array bounds [-Rpass-analysis=loop-vectorize]
+  for(i=0; i < nnz; i++)
+  ^
+my_csc.c:47:3: remark: loop not vectorized: cannot identify array bounds [-Rpass-analysis=loop-vectorize]
+                for(k=cols_start[i] ; k < j; k++){
+                ^
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+spmv.c:32:5: remark: loop not vectorized: control flow cannot be substituted for a select [-Rpass-analysis=loop-vectorize]
+    } else {
+    ^
+spmv.c:28:10: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    if ((rand() % 100) / 100.0 < density) {
+         ^
+spmv.c:27:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < n * n; i++) {
+  ^
+spmv.c:44:24: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    vec[i] = ((double)(rand() % 10) + (double)rand() / RAND_MAX) * (rand() % 2 == 0 ? 1 : -1);
+                       ^
+spmv.c:43:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+  for(unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:32:5: remark: loop not vectorized: control flow cannot be substituted for a select [-Rpass-analysis=loop-vectorize]
+    } else {
+    ^
+spmv.c:28:10: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    if ((rand() % 100) / 100.0 < density) {
+         ^
+spmv.c:27:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < n * n; i++) {
+  ^
+spmv.c:44:24: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    vec[i] = ((double)(rand() % 10) + (double)rand() / RAND_MAX) * (rand() % 2 == 0 ? 1 : -1);
+                       ^
+spmv.c:43:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+  for(unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:191:9: remark: loop not vectorized: value that could not be identified as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+        for (j = 0; j < size; j++) {
+        ^
+spmv.c:191:9: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:204:20: remark: loop not vectorized: value that could not be identified as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+        row_off[i] += row_off[i - 1];
+                      ^
+spmv.c:203:5: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+    for (i = 1; i <= size; i++) {
+    ^
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+  for(unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+1 warning generated.
+icx -O3 -march=native -mtune=icelake-server -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+--------Results with -O3-------
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 143 ms Time taken by my dense matrix-vector product (MKL): 143 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 38 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 63 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 35 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 87 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -march=native -mtune=icelake-server -fast -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+1 warning generated.
+icx -march=native -mtune=icelake-server -fast -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+-------Results with -Ofast-----
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 147 ms Time taken by my dense matrix-vector product (MKL): 125 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 39 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 64 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 33 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 88 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -O0 -Wall -Wextra  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+1 warning generated.
+icx -O0 -Wall -Wextra  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+--------Results with -O0-------
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 150 ms Time taken by my dense matrix-vector product (MKL): 877 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 38 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 88 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 81 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 95 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -O2 -no-vec -Wall -Wextra  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+1 warning generated.
+icx -O2 -no-vec -Wall -Wextra  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+-----Results with -O2-novec----
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 133 ms Time taken by my dense matrix-vector product (MKL): 308 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 39 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 31 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 35 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 113 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 87 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -O3 -march=native -mtune=icelake-server -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+my_dense.c:22:5: remark: vectorized loop (vectorization width: 4, interleaved count: 4) [-Rpass=loop-vectorize]
+    for (j=0; j < n ; j++){
+    ^
+my_csr.c:52:2: remark: vectorized loop (vectorization width: 4, interleaved count: 4) [-Rpass=loop-vectorize]
+        for(k=rows_start[i]; k < j; k++){
+        ^
+my_coo.c:36:3: remark: loop not vectorized: cannot identify array bounds [-Rpass-analysis=loop-vectorize]
+  for(i=0; i < nnz; i++)
+  ^
+my_csc.c:47:3: remark: loop not vectorized: cannot identify array bounds [-Rpass-analysis=loop-vectorize]
+                for(k=cols_start[i] ; k < j; k++){
+                ^
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+spmv.c:32:5: remark: loop not vectorized: control flow cannot be substituted for a select [-Rpass-analysis=loop-vectorize]
+    } else {
+    ^
+spmv.c:28:10: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    if ((rand() % 100) / 100.0 < density) {
+         ^
+spmv.c:27:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < n * n; i++) {
+  ^
+spmv.c:44:24: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    vec[i] = ((double)(rand() % 10) + (double)rand() / RAND_MAX) * (rand() % 2 == 0 ? 1 : -1);
+                       ^
+spmv.c:43:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+  for(unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:32:5: remark: loop not vectorized: control flow cannot be substituted for a select [-Rpass-analysis=loop-vectorize]
+    } else {
+    ^
+spmv.c:28:10: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    if ((rand() % 100) / 100.0 < density) {
+         ^
+spmv.c:27:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < n * n; i++) {
+  ^
+spmv.c:44:24: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    vec[i] = ((double)(rand() % 10) + (double)rand() / RAND_MAX) * (rand() % 2 == 0 ? 1 : -1);
+                       ^
+spmv.c:43:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+  for(unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:191:9: remark: loop not vectorized: value that could not be identified as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+        for (j = 0; j < size; j++) {
+        ^
+spmv.c:191:9: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:204:20: remark: loop not vectorized: value that could not be identified as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+        row_off[i] += row_off[i - 1];
+                      ^
+spmv.c:203:5: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+    for (i = 1; i <= size; i++) {
+    ^
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+  for(unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+1 warning generated.
+icx -O3 -march=native -mtune=icelake-server -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+--------Results with -O3-------
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 145 ms Time taken by my dense matrix-vector product (MKL): 143 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 39 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 63 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 35 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 87 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -march=native -mtune=icelake-server -fast -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+1 warning generated.
+icx -march=native -mtune=icelake-server -fast -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+-------Results with -Ofast-----
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 145 ms Time taken by my dense matrix-vector product (MKL): 121 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 39 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 64 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 33 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 113 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 88 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -O0 -Wall -Wextra  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+1 warning generated.
+icx -O0 -Wall -Wextra  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+--------Results with -O0-------
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 152 ms Time taken by my dense matrix-vector product (MKL): 876 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 39 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 88 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 81 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 95 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -O2 -no-vec -Wall -Wextra  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+1 warning generated.
+icx -O2 -no-vec -Wall -Wextra  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+-----Results with -O2-novec----
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 146 ms Time taken by my dense matrix-vector product (MKL): 307 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 38 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 32 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 36 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 87 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -O3 -march=native -mtune=icelake-server -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+my_dense.c:22:5: remark: vectorized loop (vectorization width: 4, interleaved count: 4) [-Rpass=loop-vectorize]
+    for (j=0; j < n ; j++){
+    ^
+my_csr.c:52:2: remark: vectorized loop (vectorization width: 4, interleaved count: 4) [-Rpass=loop-vectorize]
+        for(k=rows_start[i]; k < j; k++){
+        ^
+my_coo.c:36:3: remark: loop not vectorized: cannot identify array bounds [-Rpass-analysis=loop-vectorize]
+  for(i=0; i < nnz; i++)
+  ^
+my_csc.c:47:3: remark: loop not vectorized: cannot identify array bounds [-Rpass-analysis=loop-vectorize]
+                for(k=cols_start[i] ; k < j; k++){
+                ^
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+spmv.c:32:5: remark: loop not vectorized: control flow cannot be substituted for a select [-Rpass-analysis=loop-vectorize]
+    } else {
+    ^
+spmv.c:28:10: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    if ((rand() % 100) / 100.0 < density) {
+         ^
+spmv.c:27:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < n * n; i++) {
+  ^
+spmv.c:44:24: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    vec[i] = ((double)(rand() % 10) + (double)rand() / RAND_MAX) * (rand() % 2 == 0 ? 1 : -1);
+                       ^
+spmv.c:43:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+  for(unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:32:5: remark: loop not vectorized: control flow cannot be substituted for a select [-Rpass-analysis=loop-vectorize]
+    } else {
+    ^
+spmv.c:28:10: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    if ((rand() % 100) / 100.0 < density) {
+         ^
+spmv.c:27:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < n * n; i++) {
+  ^
+spmv.c:44:24: remark: loop not vectorized: call instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+    vec[i] = ((double)(rand() % 10) + (double)rand() / RAND_MAX) * (rand() % 2 == 0 ? 1 : -1);
+                       ^
+spmv.c:43:3: remark: loop not vectorized: instruction cannot be vectorized [-Rpass-analysis=loop-vectorize]
+  for (unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+  for(unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:191:9: remark: loop not vectorized: value that could not be identified as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+        for (j = 0; j < size; j++) {
+        ^
+spmv.c:191:9: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:204:20: remark: loop not vectorized: value that could not be identified as reduction is used outside the loop [-Rpass-analysis=loop-vectorize]
+        row_off[i] += row_off[i - 1];
+                      ^
+spmv.c:203:5: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+    for (i = 1; i <= size; i++) {
+    ^
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+  for(unsigned int i = 0; i < size; i++) {
+  ^
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: loop control flow is not understood by vectorizer [-Rpass-analysis=loop-vectorize]
+spmv.c:59:3: remark: loop not vectorized: could not determine number of loop iterations [-Rpass-analysis=loop-vectorize]
+1 warning generated.
+icx -O3 -march=native -mtune=icelake-server -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+--------Results with -O3-------
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 147 ms Time taken by my dense matrix-vector product (MKL): 143 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 38 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 63 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 34 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 87 ms Result is ok!
+rm -f timer_g.o my_dense_g.o my_csr_g.o my_coo_g.o my_csc_g.o spmv_g.o timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o gsl mkl *~
+icx -march=native -mtune=icelake-server -fast -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.c my_dense.c my_csr.c my_coo.c my_csc.c spmv.c -c
+spmv.c:336:3: warning: 'mkl_dcsrcsc' is deprecated [-Wdeprecated-declarations]
+  mkl_dcsrcsc(job, &size , csr_values, cols_indx, rows_start, csc_values, csc_row_indices, csc_col_ptr, &info);
+  ^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:524:1: note: 'mkl_dcsrcsc' has been explicitly marked deprecated here
+MKL_DEPRECATED void mkl_dcsrcsc(const MKL_INT *job, const MKL_INT *n, double *Acsr, MKL_INT *AJ0, MKL_INT *AI0, double *Acsc, MKL_INT *AJ1, MKL_INT *AI1, MKL_INT *info);
+^
+/opt/cesga/2020/software/Core/imkl/2021.3.0/mkl/include/mkl_spblas.h:27:39: note: expanded from macro 'MKL_DEPRECATED'
+#define MKL_DEPRECATED __attribute__((deprecated))
+                                      ^
+1 warning generated.
+icx -march=native -mtune=icelake-server -fast -Wall -Wextra -vec -Rpass=loop-vectorize -Rpass-analysis=loop-vectorize  -D_MKL_  timer.o my_dense.o my_csr.o my_coo.o my_csc.o spmv.o -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl -o mkl
+-------------------------------
+-------Results with -Ofast-----
+-------------------------------
+Matriz size: 16384 x 16384 (268435456 elements) 26837519 non-zero elements (10.00%) Dense computation ---------------- Time taken by CBLAS (MKL) dense computation: 147 ms Time taken by my dense matrix-vector product (MKL): 121 ms Result is ok! Time taken by MKL (CSR) sparse matrix - vector product: 38 ms Result is ok! Time taken by my csr matrix (MKL) - vector product: 65 ms Result is ok! Time taken by MKL (CSC) sparse matrix - vector product: 32 ms Result is ok! Time taken by my csc matrix (MKL) - vector product: 33 ms Result is ok! Time taken by MKL (COO) sparse matrix - vector product: 112 ms Result is ok! Time taken by my coo matrix (MKL) - vector product: 88 ms Result is ok!
+------------------------
+-----------O0-----------
+------------------------
+Mean time for CBLAS (MKL) dense computation: 170.66 ms
+------------------------
+-----------O2-----------
+------------------------
+Mean time for CBLAS (MKL) dense computation: 140.66 ms
+------------------------
+-----------O3-----------
+------------------------
+Mean time for CBLAS (MKL) dense computation: 145.00 ms
+------------------------
+---------fast-----------
+------------------------
+Mean time for CBLAS (MKL) dense computation: 146.33 ms
+------------------------
+-----------O0-----------
+------------------------
+Mean time for my dense matrix-vector product (MKL): 882.66 ms
+------------------------
+-----------O2-----------
+------------------------
+Mean time for my dense matrix-vector product (MKL): 307.66 ms
+------------------------
+-----------O3-----------
+------------------------
+Mean time for my dense matrix-vector product (MKL): 143.00 ms
+------------------------
+---------fast-----------
+------------------------
+Mean time for my dense matrix-vector product (MKL): 122.33 ms
+------------------------
+-----------O0-----------
+------------------------
+Mean time for MKL (CSR) sparse matrix - vector product: 38.33 ms
+------------------------
+-----------O2-----------
+------------------------
+Mean time for MKL (CSR) sparse matrix - vector product: 38.66 ms
+------------------------
+-----------O3-----------
+------------------------
+Mean time for MKL (CSR) sparse matrix - vector product: 38.33 ms
+------------------------
+---------fast-----------
+------------------------
+Mean time for MKL (CSR) sparse matrix - vector product: 38.66 ms
+------------------------
+-----------O0-----------
+------------------------
+Mean time for my csr matrix (MKL) - vector product: 88.33 ms
+------------------------
+-----------O2-----------
+------------------------
+Mean time for my csr matrix (MKL) - vector product: 31.33 ms
+------------------------
+-----------O3-----------
+------------------------
+Mean time for my csr matrix (MKL) - vector product: 63.00 ms
+------------------------
+---------fast-----------
+------------------------
+Mean time for my csr matrix (MKL) - vector product: 64.33 ms
+------------------------
+-----------O0-----------
+------------------------
+Mean time for MKL (CSC) sparse matrix - vector product: 32.00 ms
+------------------------
+-----------O2-----------
+------------------------
+Mean time for MKL (CSC) sparse matrix - vector product: 32.00 ms
+------------------------
+-----------O3-----------
+------------------------
+Mean time for MKL (CSC) sparse matrix - vector product: 32.00 ms
+------------------------
+---------fast-----------
+------------------------
+Mean time for MKL (CSC) sparse matrix - vector product: 32.00 ms
+------------------------
+-----------O0-----------
+------------------------
+Mean time for my csc matrix (MKL) - vector product: 81.33 ms
+------------------------
+-----------O2-----------
+------------------------
+Mean time for my csc matrix (MKL) - vector product: 35.66 ms
+------------------------
+-----------O3-----------
+------------------------
+Mean time for my csc matrix (MKL) - vector product: 34.66 ms
+------------------------
+---------fast-----------
+------------------------
+Mean time for my csc matrix (MKL) - vector product: 33.00 ms
+------------------------
+-----------O0-----------
+------------------------
+Mean time for MKL (COO) sparse matrix - vector product: 112.00 ms
+------------------------
+-----------O2-----------
+------------------------
+Mean time for MKL (COO) sparse matrix - vector product: 112.33 ms
+------------------------
+-----------O3-----------
+------------------------
+Mean time for MKL (COO) sparse matrix - vector product: 112.00 ms
+------------------------
+---------fast-----------
+------------------------
+Mean time for MKL (COO) sparse matrix - vector product: 112.33 ms
+------------------------
+-----------O0-----------
+------------------------
+Mean time for my coo matrix (MKL) - vector product: 95.00 ms
+------------------------
+-----------O2-----------
+------------------------
+Mean time for my coo matrix (MKL) - vector product: 87.00 ms
+------------------------
+-----------O3-----------
+------------------------
+Mean time for my coo matrix (MKL) - vector product: 87.00 ms
+------------------------
+---------fast-----------
+------------------------
+Mean time for my coo matrix (MKL) - vector product: 88.00 ms
+
+*****************************************************************************
+*                                                                           *
+*                    JOB EFFICIENCY REPORT (seff 9950451)                   *
+*                                                                           *
+*****************************************************************************
+
+Job ID: 9950451
+Cluster: finisterrae3
+User/Group: curso347/ulc
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 64
+CPU Utilized: 00:01:27
+CPU Efficiency: 1.48% of 01:38:08 core-walltime
+Job Wall-clock time: 00:01:32
+Memory Utilized: 2.25 GB
+Memory Efficiency: 28.10% of 8.00 GB
+
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ ++   Memory Efficiency is too small. Please review the requested memory. ++
+ ++ It seems that you do not need that much memory so we recommend        ++
+ ++ requesting less memory in other similar jobs.                         ++
+ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+*****************************************************************************
+
